@@ -13,6 +13,10 @@ class LoginModel {
 
   final String _baseUrl = "http://10.0.2.2:3000/auth";
 
+  // Dodane pola
+  String? accessToken;
+  String? role;
+
   void dispose() {
     emailAddressTextController.dispose();
     emailAddressFocusNode.dispose();
@@ -43,8 +47,12 @@ class LoginModel {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-        debugPrint("Login successful: ${responseData['message']}");
-        // Optionally store token or user data here
+        debugPrint("Login successful: $responseData");
+
+        // Tutaj odczytaj pole "role" i "access_token" zwrócone przez backend
+        accessToken = responseData["access_token"];
+        role = responseData["role"];
+
         return true;
       } else {
         debugPrint("Login failed: ${response.body}");

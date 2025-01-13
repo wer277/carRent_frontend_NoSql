@@ -273,21 +273,38 @@ class _LoginWidgetState extends State<LoginWidget>
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0, 0, 0, 16),
                               child: ElevatedButton(
-                                onPressed: () async {
+                               onPressed: () async {
                                   bool success = await _model.loginUser();
                                   if (success) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Login successful'),
-                                      ),
-                                    );
-                                    Navigator.pushReplacementNamed(
-                                        context, 'Home');
+                                    // Załóżmy, że w momencie logowania (metoda _model.loginUser())
+                                    // pobierasz z backendu rolę i przechowujesz ją we właściwości _model.role
+                                    // np. _model.role może przyjąć wartość "client", "employee", "rental_admin", "platform_admin"
+
+                                    final String? userRole = _model.role;
+
+                                    if (userRole == 'client') {
+                                      Navigator.pushReplacementNamed(
+                                          context, 'ClientHome');
+                                    } else if (userRole == 'employee') {
+                                      Navigator.pushReplacementNamed(
+                                          context, 'EmployeeHome');
+                                    } else if (userRole == 'rental_admin') {
+                                      Navigator.pushReplacementNamed(
+                                          context, 'RentalAdminHome');
+                                    } else if (userRole == 'platform_admin') {
+                                      Navigator.pushReplacementNamed(
+                                          context, 'PlatformAdminHome');
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Unknown role')),
+                                      );
+                                    }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Login failed'),
-                                      ),
+                                          content: Text('Login failed')),
                                     );
                                   }
                                 },

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:carrent_frontend/screens/login_screen.dart';
 import 'package:carrent_frontend/screens/register_screen.dart';
 import 'package:carrent_frontend/colors.dart';
+import 'package:carrent_frontend/client/screens/client_home_screen.dart';
+import 'package:carrent_frontend/employee/screens/employee_home_screen.dart';
+import 'package:carrent_frontend/rental_admin/screens/rental_admin_home_screen.dart';
+import 'package:carrent_frontend/platform_admin/screens/platform_admin_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +30,16 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: 'Register',
+      initialRoute: 'Login',
       routes: {
         'Register': (context) => const RegisterWidget(),
         'Login': (context) => const LoginWidget(),
+
+        // Ścieżki do poszczególnych ról
+        'ClientHome': (context) => const ClientHomeScreen(),
+        'EmployeeHome': (context) => const EmployeeHomeScreen(),
+        'RentalAdminHome': (context) => const RentalAdminHomeScreen(),
+        'PlatformAdminHome': (context) => const PlatformAdminHomeScreen(),
       },
     );
   }
