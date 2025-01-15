@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:carrent_frontend/navigation_menu.dart';
+import 'package:carrent_frontend/rental_admin/screens/navigation_menu_rental_admin.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   const ClientHomeScreen({super.key});

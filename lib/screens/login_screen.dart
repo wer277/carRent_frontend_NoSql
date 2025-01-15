@@ -290,7 +290,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                           context, 'EmployeeHome');
                                     } else if (userRole == 'rental_admin') {
                                       Navigator.pushReplacementNamed(
-                                          context, 'RentalAdminHome');
+                                          context, 'NavigationMenuRentalAdmin');
                                     } else if (userRole == 'platform_admin') {
                                       Navigator.pushReplacementNamed(
                                           context, 'PlatformAdminHome');

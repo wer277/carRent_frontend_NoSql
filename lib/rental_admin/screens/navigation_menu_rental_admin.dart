@@ -1,12 +1,13 @@
+import 'package:carrent_frontend/rental_admin/screens/rental_admin_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
-import 'package:carrent_frontend/client/screens/client_home_screen.dart';
 
-class NavigationMenu extends StatelessWidget {
-  NavigationMenu({Key? key}) : super(key: key);
 
-  final NavigationController controller = Get.put(NavigationController());
+class NavigationMenuRentalAdmin extends StatelessWidget {
+  NavigationMenuRentalAdmin({Key? key}) : super(key: key);
+
+  final NavigationControllerRentalAdmin controller = Get.put(NavigationControllerRentalAdmin());
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +32,11 @@ class NavigationMenu extends StatelessWidget {
   }
 }
 
-class NavigationController extends GetxController {
+class NavigationControllerRentalAdmin extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
   final screens = [
-    const ClientHomeScreen(), // index 0
+    const RentalAdminHomeScreen(), // index 0
     Container(
       color: Colors.blue,
     ),
