@@ -6,6 +6,7 @@ import 'package:carrent_frontend/client/screens/client_home_screen.dart';
 import 'package:carrent_frontend/employee/screens/employee_home_screen.dart';
 import 'package:carrent_frontend/rental_admin/screens/rental_admin_home_screen.dart';
 import 'package:carrent_frontend/platform_admin/screens/platform_admin_home_screen.dart';
+import 'package:carrent_frontend/navigation_menu.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         'EmployeeHome': (context) => const EmployeeHomeScreen(),
         'RentalAdminHome': (context) => const RentalAdminHomeScreen(),
         'PlatformAdminHome': (context) => const PlatformAdminHomeScreen(),
+        'NavigationMenu': (context) =>  NavigationMenu(),
       },
     );
   }

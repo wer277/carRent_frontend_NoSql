@@ -284,7 +284,7 @@ class _LoginWidgetState extends State<LoginWidget>
 
                                     if (userRole == 'client') {
                                       Navigator.pushReplacementNamed(
-                                          context, 'ClientHome');
+                                          context, 'NavigationMenu');
                                     } else if (userRole == 'employee') {
                                       Navigator.pushReplacementNamed(
                                           context, 'EmployeeHome');

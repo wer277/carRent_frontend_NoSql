@@ -37,6 +37,8 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   font_awesome_flutter: ^10.4.0
   http: ^0.13.0
+  iconsax_flutter: ^1.0.0
+  get: ^4.6.5
 
 
 dev_dependencies:
