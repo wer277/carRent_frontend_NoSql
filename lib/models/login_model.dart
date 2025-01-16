@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginModel {
   late TextEditingController emailAddressTextController;
@@ -16,6 +17,13 @@ class LoginModel {
   // Dodane pola
   String? accessToken;
   String? role;
+
+  LoginModel() {
+    emailAddressTextController = TextEditingController();
+    emailAddressFocusNode = FocusNode();
+    passwordTextController = TextEditingController();
+    passwordFocusNode = FocusNode();
+  }
 
   void dispose() {
     emailAddressTextController.dispose();
@@ -49,9 +57,12 @@ class LoginModel {
         final responseData = jsonDecode(response.body);
         debugPrint("Login successful: $responseData");
 
-        // Tutaj odczytaj pole "role" i "access_token" zwrócone przez backend
+        // Odczytaj pole "role" i "access_token" zwrócone przez backend
         accessToken = responseData["access_token"];
         role = responseData["role"];
+
+        // Zapisz token i rolę w pamięci lokalnej
+        await _saveTokenAndRole(accessToken, role);
 
         return true;
       } else {
@@ -62,5 +73,28 @@ class LoginModel {
       debugPrint("Error during login: $e");
       return false;
     }
+  }
+
+  // Zapisanie tokenu i roli w pamięci lokalnej
+  Future<void> _saveTokenAndRole(String? token, String? userRole) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (token != null) {
+      await prefs.setString('access_token', token);
+    }
+    if (userRole != null) {
+      await prefs.setString('user_role', userRole);
+    }
+  }
+
+  // Pobranie tokenu z pamięci lokalnej
+  Future<String?> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
+  // Pobranie roli z pamięci lokalnej
+  Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_role');
   }
 }
