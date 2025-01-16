@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carrent_frontend/platform_admin/screens/rental_admin_list_screen.dart';
 import 'package:carrent_frontend/platform_admin/services/rental_admin_service.dart';
+import 'package:carrent_frontend/platform_admin/screens/platform_admin_profil_screen.dart';
 
 class NavigationMenuPlatformAdmin extends StatelessWidget {
   NavigationMenuPlatformAdmin({Key? key}) : super(key: key);
@@ -71,7 +72,7 @@ class NavigationControllerPlatformAdmin extends GetxController {
       RentalAdminListScreen(service: service), // index 0
       Container(color: Colors.blue), // index 1
       Container(color: Colors.green), // index 2
-      Container(color: Colors.yellow), // index 3
+      PlatformAdminProfile(), // index 3
     ];
 
     return screens[selectedIndex.value];

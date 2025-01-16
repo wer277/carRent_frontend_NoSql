@@ -14,7 +14,6 @@ class LoginModel {
 
   final String _baseUrl = "http://10.0.2.2:3000/auth";
 
-  // Dodane pola
   String? accessToken;
   String? role;
 
@@ -33,6 +32,8 @@ class LoginModel {
   }
 
   Future<bool> loginUser() async {
+    await _clearOldToken(); // Wyczyść stare tokeny przed logowaniem
+
     final email = emailAddressTextController.text.trim();
     final password = passwordTextController.text.trim();
 
@@ -53,15 +54,18 @@ class LoginModel {
         }),
       );
 
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response body: ${response.body}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         debugPrint("Login successful: $responseData");
 
-        // Odczytaj pole "role" i "access_token" zwrócone przez backend
         accessToken = responseData["access_token"];
         role = responseData["role"];
+        debugPrint("Access Token: $accessToken, Role: $role");
 
-        // Zapisz token i rolę w pamięci lokalnej
+        // Zapisz token i rolę w SharedPreferences
         await _saveTokenAndRole(accessToken, role);
 
         return true;
@@ -75,24 +79,32 @@ class LoginModel {
     }
   }
 
-  // Zapisanie tokenu i roli w pamięci lokalnej
+  Future<void> _clearOldToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+    await prefs.remove('user_role');
+  }
+
   Future<void> _saveTokenAndRole(String? token, String? userRole) async {
     final prefs = await SharedPreferences.getInstance();
+
     if (token != null) {
+      debugPrint("Saving token: $token");
       await prefs.setString('access_token', token);
     }
+
     if (userRole != null) {
+      debugPrint("Saving role: $userRole");
       await prefs.setString('user_role', userRole);
     }
   }
 
-  // Pobranie tokenu z pamięci lokalnej
+
   Future<String?> getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
 
-  // Pobranie roli z pamięci lokalnej
   Future<String?> getUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_role');

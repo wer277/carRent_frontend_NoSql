@@ -6,42 +6,49 @@ import 'package:carrent_frontend/colors.dart';
 import 'package:carrent_frontend/client/screens/client_home_screen.dart';
 import 'package:carrent_frontend/employee/screens/employee_home_screen.dart';
 import 'package:carrent_frontend/rental_admin/screens/rental_admin_home_screen.dart';
-import 'package:carrent_frontend/platform_admin/screens/platform_admin_home_screen.dart';
 import 'package:carrent_frontend/rental_admin/screens/navigation_menu_rental_admin.dart';
 import 'package:carrent_frontend/platform_admin/screens/navigation_menu_platform_admin.dart';
 import 'package:carrent_frontend/platform_admin/screens/rental_admin_list_screen.dart';
 import 'package:carrent_frontend/platform_admin/services/rental_admin_service.dart';
+import 'package:carrent_frontend/platform_admin/screens/platform_admin_profil_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Odczytaj token i rolę z SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('access_token');
-  final role = prefs.getString('user_role');
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    final token = prefs.getString('access_token');
+    final role = prefs.getString('user_role');
+    print('Token from SharedPreferences: $token');
+    print('Role from SharedPreferences: $role');
 
-  // Utwórz instancję RentalAdminService
-  final rentalAdminService = RentalAdminService(
-    baseUrl: 'http://10.0.2.2:3000',
-  );
+    final rentalAdminService = RentalAdminService(
+      baseUrl: 'http://10.0.2.2:3000',
+    );
 
-  runApp(MyApp(
-    token: token,
-    role: role,
-    service: rentalAdminService,
-  ));
+    runApp(MyApp(
+      token: token,
+      role: role,
+      service: rentalAdminService,
+    ));
+  } catch (e) {
+    print('Error initializing app: $e');
+    runApp(const MyApp(token: null, role: null, service: null));
+  }
 }
 
 class MyApp extends StatelessWidget {
   final String? token;
   final String? role;
-  final RentalAdminService service;
+  final RentalAdminService? service;
 
-  const MyApp(
-      {super.key,
-      required this.token,
-      required this.role,
-      required this.service});
+  const MyApp({
+    super.key,
+    required this.token,
+    required this.role,
+    required this.service,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,27 +68,40 @@ class MyApp extends StatelessWidget {
       initialRoute: token == null ? 'Login' : _getHomeRoute(role),
       routes: {
         'Register': (context) => const RegisterWidget(),
-        'Login': (context) => const LoginWidget(),
+        'Login': (context) =>  LoginWidget(getHomeRoute: _getHomeRoute),
 
         // Ścieżki do poszczególnych ról
         'ClientHome': (context) => const ClientHomeScreen(),
         'EmployeeHome': (context) => const EmployeeHomeScreen(),
         'RentalAdminHome': (context) => const RentalAdminHomeScreen(),
-        'PlatformAdminHome': (context) => const PlatformAdminHomeScreen(),
         'NavigationMenuRentalAdmin': (context) => NavigationMenuRentalAdmin(),
         'NavigationMenuPlatformAdmin': (context) =>
             NavigationMenuPlatformAdmin(),
-        'RentalAdminScreenView': (context) =>
-            RentalAdminListScreen(service: service),
+        'RentalPlatformProfile': (context) => const PlatformAdminProfile(),
+
+        if (service != null)
+          'RentalAdminScreenView': (context) =>
+              RentalAdminListScreen(service: service!),
       },
+      // onUnknownRoute zakomentowany
+       onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+           builder: (context) => Scaffold(
+             body: Center(
+               child: Text('Unknown route: ${settings.name}'),
+             ),
+           ),
+         );
+       },
     );
   }
 
   // Funkcja zwraca odpowiednią trasę w zależności od roli
   String _getHomeRoute(String? role) {
+    print('Determining home route for role: $role');
     switch (role) {
       case 'platform_admin':
-        return 'NavigationMenuPlatformAdmin';
+        return 'NavigationMenuPlatformAdmin'; // Sprawdź nazwę trasy
       case 'rental_admin':
         return 'RentalAdminHome';
       case 'employee':

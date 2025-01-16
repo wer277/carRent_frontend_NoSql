@@ -62,31 +62,48 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Rental Admins')),
-      body: FutureBuilder<List<RentalAdmin>>(
-        future: _rentalAdmins,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const LoadingIndicator();
-          } else if (snapshot.hasError) {
-            return ErrorMessage(
-                message: 'Failed to load rental admins: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No rental admins found'));
-          } else {
-            final admins = snapshot.data!;
-            return ListView.builder(
-              itemCount: admins.length,
-              itemBuilder: (context, index) {
-                final admin = admins[index];
-                return RentalAdminItem(
-                  rentalAdmin: admin,
-                  onDelete: () => _deleteRentalAdmin(admin.id),
-                  onEdit: () => _navigateToEditScreen(admin.id),
+      body: Stack(
+        children: [
+          // Tło z grafiką
+          Center(
+            child: Opacity(
+              opacity: 0.3, // Ustawienie przezroczystości na 30%
+              child: Image.asset(
+                'assets/images/tloListView.png', // Ścieżka do obrazu
+                fit: BoxFit.cover, // Dopasowanie obrazu
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+          // Zawartość ekranu
+          FutureBuilder<List<RentalAdmin>>(
+            future: _rentalAdmins,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const LoadingIndicator();
+              } else if (snapshot.hasError) {
+                return ErrorMessage(
+                    message: 'Failed to load rental admins: ${snapshot.error}');
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No rental admins found'));
+              } else {
+                final admins = snapshot.data!;
+                return ListView.builder(
+                  itemCount: admins.length,
+                  itemBuilder: (context, index) {
+                    final admin = admins[index];
+                    return RentalAdminItem(
+                      rentalAdmin: admin,
+                      onDelete: () => _deleteRentalAdmin(admin.id),
+                      onEdit: () => _navigateToEditScreen(admin.id),
+                    );
+                  },
                 );
-              },
-            );
-          }
-        },
+              }
+            },
+          ),
+        ],
       ),
     );
   }
