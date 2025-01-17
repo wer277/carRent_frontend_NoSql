@@ -100,4 +100,80 @@ Future<void> logout(BuildContext context) async {
     Navigator.pushNamedAndRemoveUntil(context, 'Login', (route) => false);
   }
 
+  // rental_admin_service.dart
+  // W rental_admin_service.dart dodaj metodę:
+  Future<void> createRentalAdmin(Map<String, dynamic> data) async {
+    final token = await _getToken();
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/create-rental-admin'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(data),
+    );
+
+    if (response.statusCode == 401) {
+      await _handleUnauthorized();
+      throw Exception('Unauthorized access');
+    } else if (response.statusCode != 201) {
+      final errorMessage =
+          json.decode(response.body)['message'] ?? 'Unknown error occurred';
+      throw Exception('Failed to create rental admin: $errorMessage');
+    }
+  }
+
+  Future<RentalAdmin> getCurrentAdmin() async {
+    final token = await _getToken();
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
+    print('Sending token: $token'); // Debugowanie tokena
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/platform_admins/current'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return RentalAdmin.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 401) {
+      await _handleUnauthorized();
+      throw Exception('Unauthorized access');
+    } else {
+      throw Exception('Failed to fetch current admin data: ${response.body}');
+    }
+  }
+
+
+  Future<void> updateCurrentAdmin(Map<String, dynamic> data) async {
+    final token = await _getToken();
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/platform_admins/update'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(data),
+    );
+
+    if (response.statusCode == 401) {
+      await _handleUnauthorized();
+      throw Exception('Unauthorized access');
+    } else if (response.statusCode != 200) {
+      throw Exception('Failed to update admin data: ${response.body}');
+    }
+  }
 }

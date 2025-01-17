@@ -11,7 +11,8 @@ import 'package:carrent_frontend/platform_admin/screens/navigation_menu_platform
 import 'package:carrent_frontend/platform_admin/screens/rental_admin_list_screen.dart';
 import 'package:carrent_frontend/platform_admin/services/rental_admin_service.dart';
 import 'package:carrent_frontend/platform_admin/screens/platform_admin_profil_screen.dart';
-
+import 'package:carrent_frontend/platform_admin/screens/create_rental_admin_screen.dart';
+import 'package:carrent_frontend/platform_admin/screens/platform_admin_promotion_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -77,8 +78,9 @@ class MyApp extends StatelessWidget {
         'NavigationMenuRentalAdmin': (context) => NavigationMenuRentalAdmin(),
         'NavigationMenuPlatformAdmin': (context) =>
             NavigationMenuPlatformAdmin(),
-        'RentalPlatformProfile': (context) => const PlatformAdminProfile(),
-
+        'RentalPlatformProfile': (context) => PlatformAdminProfile(service: service!),
+        'CreateRentalAdminScreen': (context) => CreateRentalAdminScreen(service: service!),
+        'PromotionsScreen': (context) => const PromotionsScreen(),
         if (service != null)
           'RentalAdminScreenView': (context) =>
               RentalAdminListScreen(service: service!),

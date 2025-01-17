@@ -1,68 +1,78 @@
+// create_rental_admin_screen.dart
+
 import 'package:flutter/material.dart';
 import '../services/rental_admin_service.dart';
 
-class EditRentalAdminScreen extends StatefulWidget {
-  final String rentalAdminId;
+class CreateRentalAdminScreen extends StatefulWidget {
   final RentalAdminService service;
 
-  const EditRentalAdminScreen({
+  const CreateRentalAdminScreen({
     Key? key,
-    required this.rentalAdminId,
     required this.service,
   }) : super(key: key);
 
+  static const routeName = 'CreateRentalAdmin';
+
   @override
-  State<EditRentalAdminScreen> createState() => _EditRentalAdminScreenState();
+  State<CreateRentalAdminScreen> createState() =>
+      _CreateRentalAdminScreenState();
 }
 
-class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
+class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
   final _formKey = GlobalKey<FormState>();
-  String? _name;
-  String? _surname;
-  String? _email;
-  String? _password; // Nowa zmienna na nowe hasło
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
-  void _updateRentalAdmin() async {
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createRentalAdmin() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
-      _formKey.currentState?.save();
-
-      // Przygotowanie danych do aktualizacji
-      Map<String, dynamic> updateData = {
-        'name': _name,
-        'surname': _surname,
-        'email': _email,
-      };
-
-      // Dodaj hasło do danych, jeśli zostało wprowadzone
-      if (_password != null && _password!.isNotEmpty) {
-        updateData['password'] = _password;
-      }
 
       try {
-        await widget.service.updateRentalAdmin(
-          widget.rentalAdminId,
-          updateData,
-        );
+        await widget.service.createRentalAdmin({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+          'name': _nameController.text.trim(),
+          'surname': _surnameController.text.trim(),
+          'role': 'rental_admin',
+        });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Admin data updated successfully'),
+              content: Text('Rental Admin created successfully'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
             ),
           );
-          Navigator.of(context).pop();
+
+          // Powrót do listy i jej odświeżenie
+          Navigator.of(context).popUntil((route) {
+            return route.settings.name == 'RentalAdminList' || route.isFirst;
+          });
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Update failed: $e'),
+              content: Text('Failed to create Rental Admin: $e'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
             ),
           );
         }
@@ -79,7 +89,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Edycja profilu rental_admin',
+          'Create Rental Admin',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -88,7 +98,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
       ),
       body: Stack(
         children: [
-          // Tło z grafiką i przezroczystością
+          // Background image
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -100,7 +110,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
               ),
             ),
           ),
-          // Zawartość formularza
+          // Form content
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -120,15 +130,14 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                           child: Column(
                             children: [
                               _buildTextField(
+                                controller: _nameController,
                                 label: 'Name',
                                 icon: Icons.person_outline,
-                                initialValue: _name,
-                                onSaved: (value) => _name = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Name is required';
                                   }
-                                  if (value.length < 2) {
+                                  if (value.trim().length < 2) {
                                     return 'Name must be at least 2 characters';
                                   }
                                   return null;
@@ -136,15 +145,14 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
+                                controller: _surnameController,
                                 label: 'Surname',
                                 icon: Icons.person,
-                                initialValue: _surname,
-                                onSaved: (value) => _surname = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Surname is required';
                                   }
-                                  if (value.length < 2) {
+                                  if (value.trim().length < 2) {
                                     return 'Surname must be at least 2 characters';
                                   }
                                   return null;
@@ -152,35 +160,52 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
+                                controller: _emailController,
                                 label: 'Email',
                                 icon: Icons.email_outlined,
-                                initialValue: _email,
                                 keyboardType: TextInputType.emailAddress,
-                                onSaved: (value) => _email = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Adres e-mail jest wymagany';
+                                    return 'Email is required';
                                   }
                                   final emailRegex = RegExp(
                                     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
                                   );
-                                  if (!emailRegex.hasMatch(value)) {
-                                    return 'Proszę podać prawidłowy adres e-mail';
+                                  if (!emailRegex.hasMatch(value.trim())) {
+                                    return 'Please enter a valid email';
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
-                                label: 'New Password',
+                                controller: _passwordController,
+                                label: 'Password',
                                 icon: Icons.lock_outline,
-                                initialValue: null,
-                                obscureText: true,
-                                onSaved: (value) => _password = value,
+                                obscureText: _obscurePassword,
                                 validator: (value) {
-                                  // Hasło jest opcjonalne
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password is required';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
                                   return null;
                                 },
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
                               ),
                             ],
                           ),
@@ -190,7 +215,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _updateRentalAdmin,
+                          onPressed: _isLoading ? null : _createRentalAdmin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Theme.of(context).colorScheme.primary,
@@ -211,7 +236,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Zapisz zmiany',
+                                  'Create Account',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -231,18 +256,23 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required IconData icon,
-    String? initialValue,
     TextInputType? keyboardType,
     bool obscureText = false,
-    required Function(String?) onSaved,
+    Widget? suffixIcon,
     required String? Function(String?) validator,
   }) {
     return TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
@@ -271,10 +301,8 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
         filled: true,
         fillColor: Colors.grey.shade50,
       ),
-      initialValue: initialValue,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      onSaved: onSaved,
       validator: validator,
       style: const TextStyle(fontSize: 16),
     );

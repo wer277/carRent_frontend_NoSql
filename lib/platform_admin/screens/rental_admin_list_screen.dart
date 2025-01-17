@@ -61,7 +61,15 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Rental Admins')),
+      appBar: AppBar(
+        title: const Text(
+          'Lista kont rental_admin',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
       body: Stack(
         children: [
           // Tło z grafiką
