@@ -1,75 +1,75 @@
-// create_rental_admin_screen.dart
-
 import 'package:flutter/material.dart';
-import '../services/platform_admin_service.dart';
+import '../services/rental_company_service.dart';
 
-class CreateRentalAdminScreen extends StatefulWidget {
-  final RentalAdminService service;
+class CreateRentalCompanyScreen extends StatefulWidget {
+  final RentalCompanyService service;
 
-  const CreateRentalAdminScreen({
+  const CreateRentalCompanyScreen({
     Key? key,
     required this.service,
   }) : super(key: key);
 
-  static const routeName = 'CreateRentalAdmin';
+  static const routeName = 'CreateRentalCompany';
 
   @override
-  State<CreateRentalAdminScreen> createState() =>
-      _CreateRentalAdminScreenState();
+  State<CreateRentalCompanyScreen> createState() =>
+      _CreateRentalCompanyScreenState();
 }
 
-class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
+class _CreateRentalCompanyScreenState extends State<CreateRentalCompanyScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  bool _obscurePassword = true;
 
   final _nameController = TextEditingController();
-  final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _policyController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
-    _surnameController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _policyController.dispose();
     super.dispose();
   }
 
-  Future<void> _createRentalAdmin() async {
+  Future<void> _createRentalCompany() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
 
       try {
-        await widget.service.createRentalAdmin({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
+        await widget.service.createRentalCompany({
           'name': _nameController.text.trim(),
-          'surname': _surnameController.text.trim(),
-          'role': 'rental_admin',
+          'contactEmail': _emailController.text.trim(),
+          'contactPhone': _phoneController.text.trim(),
+          'address': _addressController.text.trim(),
+          'rentalPolicy': _policyController.text.trim(),
         });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Rental Admin created successfully'),
+              content: Text('Rental Company created successfully'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
               duration: Duration(seconds: 2),
             ),
           );
 
-          // Powrót do listy i jej odświeżenie
+          // Przekierowanie na listę wypożyczalni
           Navigator.of(context).popUntil((route) {
-            return route.settings.name == 'RentalAdminList' || route.isFirst;
+            return route.settings.name == 'RentalCompanyListScreen' ||
+                route.isFirst;
           });
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to create Rental Admin: $e'),
+              content: Text('Failed to create Rental Company: $e'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               duration: const Duration(seconds: 4),
@@ -89,7 +89,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Create Rental Admin',
+          'Create Rental Company',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -98,7 +98,6 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
       ),
       body: Stack(
         children: [
-          // Background image
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -110,7 +109,6 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
               ),
             ),
           ),
-          // Form content
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -131,29 +129,11 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                             children: [
                               _buildTextField(
                                 controller: _nameController,
-                                label: 'Name',
-                                icon: Icons.person_outline,
+                                label: 'Company Name',
+                                icon: Icons.business,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Name is required';
-                                  }
-                                  if (value.trim().length < 2) {
-                                    return 'Name must be at least 2 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _surnameController,
-                                label: 'Surname',
-                                icon: Icons.person,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Surname is required';
-                                  }
-                                  if (value.trim().length < 2) {
-                                    return 'Surname must be at least 2 characters';
+                                    return 'Company Name is required';
                                   }
                                   return null;
                                 },
@@ -161,12 +141,12 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                               const SizedBox(height: 16),
                               _buildTextField(
                                 controller: _emailController,
-                                label: 'Email',
+                                label: 'Contact Email',
                                 icon: Icons.email_outlined,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Email is required';
+                                    return 'Contact Email is required';
                                   }
                                   final emailRegex = RegExp(
                                     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
@@ -179,33 +159,41 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
-                                controller: _passwordController,
-                                label: 'Password',
-                                icon: Icons.lock_outline,
-                                obscureText: _obscurePassword,
+                                controller: _phoneController,
+                                label: 'Contact Phone',
+                                icon: Icons.phone,
+                                keyboardType: TextInputType.phone,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Password is required';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
+                                    return 'Contact Phone is required';
                                   }
                                   return null;
                                 },
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
-                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _addressController,
+                                label: 'Address',
+                                icon: Icons.location_on,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Address is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _policyController,
+                                label: 'Rental Policy',
+                                icon: Icons.description_outlined,
+                                maxLines: 3,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Rental Policy is required';
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),
@@ -215,7 +203,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _createRentalAdmin,
+                          onPressed: _isLoading ? null : _createRentalCompany,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Theme.of(context).colorScheme.primary,
@@ -236,7 +224,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Create Account',
+                                  'Create Rental Company',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -260,8 +248,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
     required String label,
     required IconData icon,
     TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffixIcon,
+    int maxLines = 1,
     required String? Function(String?) validator,
   }) {
     return TextFormField(
@@ -272,39 +259,15 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
           icon,
           color: Theme.of(context).colorScheme.primary,
         ),
-        suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-          ),
         ),
         filled: true,
         fillColor: Colors.grey.shade50,
       ),
       keyboardType: keyboardType,
-      obscureText: obscureText,
+      maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(fontSize: 16),
     );
   }
 }

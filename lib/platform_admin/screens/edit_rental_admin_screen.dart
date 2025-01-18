@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/rental_admin_service.dart';
+import '../services/platform_admin_service.dart';
 
 class EditRentalAdminScreen extends StatefulWidget {
   final String rentalAdminId;

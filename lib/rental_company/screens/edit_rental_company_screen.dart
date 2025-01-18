@@ -1,78 +1,68 @@
-// create_rental_admin_screen.dart
-
 import 'package:flutter/material.dart';
-import '../services/platform_admin_service.dart';
+import '../models/rental_company_model.dart';
+import '../services/rental_company_service.dart';
 
-class CreateRentalAdminScreen extends StatefulWidget {
-  final RentalAdminService service;
+class EditRentalCompanyScreen extends StatefulWidget {
+  final RentalCompany rentalCompany;
+  final RentalCompanyService service;
 
-  const CreateRentalAdminScreen({
+  const EditRentalCompanyScreen({
     Key? key,
+    required this.rentalCompany,
     required this.service,
   }) : super(key: key);
 
-  static const routeName = 'CreateRentalAdmin';
-
   @override
-  State<CreateRentalAdminScreen> createState() =>
-      _CreateRentalAdminScreenState();
+  State<EditRentalCompanyScreen> createState() =>
+      _EditRentalCompanyScreenState();
 }
 
-class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
+class _EditRentalCompanyScreenState extends State<EditRentalCompanyScreen> {
   final _formKey = GlobalKey<FormState>();
+  String? _name;
+  String? _email;
+  String? _phone;
+  String? _address;
+  String? _policy;
   bool _isLoading = false;
-  bool _obscurePassword = true;
 
-  final _nameController = TextEditingController();
-  final _surnameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _surnameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _createRentalAdmin() async {
+  void _updateRentalCompany() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
+      _formKey.currentState?.save();
+
+      // Przygotowanie danych do aktualizacji
+      Map<String, dynamic> updateData = {
+        'name': _name,
+        'contactEmail': _email,
+        'contactPhone': _phone,
+        'address': _address,
+        'rentalPolicy': _policy,
+      };
 
       try {
-        await widget.service.createRentalAdmin({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-          'name': _nameController.text.trim(),
-          'surname': _surnameController.text.trim(),
-          'role': 'rental_admin',
-        });
+        await widget.service.updateRentalCompany(
+          widget.rentalCompany.id,
+          updateData,
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Rental Admin created successfully'),
+              content: Text('Rental company updated successfully'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
             ),
           );
-
-          // Powrót do listy i jej odświeżenie
-          Navigator.of(context).popUntil((route) {
-            return route.settings.name == 'RentalAdminList' || route.isFirst;
-          });
+          Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to create Rental Admin: $e'),
+              content: Text('Update failed: $e'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 4),
             ),
           );
         }
@@ -89,7 +79,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Create Rental Admin',
+          'Edycja wypożyczalni',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -98,7 +88,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
       ),
       body: Stack(
         children: [
-          // Background image
+          // Tło z grafiką i przezroczystością
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -110,7 +100,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
               ),
             ),
           ),
-          // Form content
+          // Zawartość formularza
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -130,48 +120,32 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                           child: Column(
                             children: [
                               _buildTextField(
-                                controller: _nameController,
                                 label: 'Name',
-                                icon: Icons.person_outline,
+                                icon: Icons.business,
+                                initialValue: widget.rentalCompany.name,
+                                onSaved: (value) => _name = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Name is required';
                                   }
-                                  if (value.trim().length < 2) {
-                                    return 'Name must be at least 2 characters';
-                                  }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
-                                controller: _surnameController,
-                                label: 'Surname',
-                                icon: Icons.person,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Surname is required';
-                                  }
-                                  if (value.trim().length < 2) {
-                                    return 'Surname must be at least 2 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildTextField(
-                                controller: _emailController,
-                                label: 'Email',
+                                label: 'Contact Email',
                                 icon: Icons.email_outlined,
+                                initialValue: widget.rentalCompany.contactEmail,
                                 keyboardType: TextInputType.emailAddress,
+                                onSaved: (value) => _email = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Email is required';
+                                    return 'Contact Email is required';
                                   }
                                   final emailRegex = RegExp(
                                     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
                                   );
-                                  if (!emailRegex.hasMatch(value.trim())) {
+                                  if (!emailRegex.hasMatch(value)) {
                                     return 'Please enter a valid email';
                                   }
                                   return null;
@@ -179,33 +153,44 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
-                                controller: _passwordController,
-                                label: 'Password',
-                                icon: Icons.lock_outline,
-                                obscureText: _obscurePassword,
+                                label: 'Contact Phone',
+                                icon: Icons.phone,
+                                initialValue: widget.rentalCompany.contactPhone,
+                                keyboardType: TextInputType.phone,
+                                onSaved: (value) => _phone = value,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Password is required';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
+                                    return 'Contact Phone is required';
                                   }
                                   return null;
                                 },
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
-                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                label: 'Address',
+                                icon: Icons.location_on,
+                                initialValue: widget.rentalCompany.address,
+                                onSaved: (value) => _address = value,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Address is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                label: 'Rental Policy',
+                                icon: Icons.description_outlined,
+                                initialValue: widget.rentalCompany.rentalPolicy,
+                                maxLines: 3,
+                                onSaved: (value) => _policy = value,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Rental Policy is required';
+                                  }
+                                  return null;
+                                },
                               ),
                             ],
                           ),
@@ -215,7 +200,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _createRentalAdmin,
+                          onPressed: _isLoading ? null : _updateRentalCompany,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Theme.of(context).colorScheme.primary,
@@ -236,7 +221,7 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Create Account',
+                                  'Zapisz zmiany',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -256,23 +241,18 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
   }
 
   Widget _buildTextField({
-    required TextEditingController controller,
     required String label,
     required IconData icon,
+    String? initialValue,
     TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffixIcon,
+    int maxLines = 1,
+    required Function(String?) onSaved,
     required String? Function(String?) validator,
   }) {
     return TextFormField(
-      controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        suffixIcon: suffixIcon,
+        prefixIcon: Icon(icon),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
@@ -301,8 +281,10 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
         filled: true,
         fillColor: Colors.grey.shade50,
       ),
+      initialValue: initialValue,
       keyboardType: keyboardType,
-      obscureText: obscureText,
+      maxLines: maxLines,
+      onSaved: onSaved,
       validator: validator,
       style: const TextStyle(fontSize: 16),
     );

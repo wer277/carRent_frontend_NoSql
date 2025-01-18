@@ -1,22 +1,20 @@
-import 'package:carrent_frontend/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/platform_admin_service.dart';
+import '../services/rental_admin_service.dart';
 import '../models/rental_admin_model.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
 
-class PlatformAdminProfile extends StatefulWidget {
-  final RentalAdminService service;
+class RentalAdminProfile extends StatefulWidget {
+  final RentalService service;
 
-  const PlatformAdminProfile({Key? key, required this.service})
-      : super(key: key);
+  const RentalAdminProfile({Key? key, required this.service}) : super(key: key);
 
   @override
-  _PlatformAdminProfileState createState() => _PlatformAdminProfileState();
+  _RentalAdminProfileState createState() => _RentalAdminProfileState();
 }
 
-class _PlatformAdminProfileState extends State<PlatformAdminProfile> {
+class _RentalAdminProfileState extends State<RentalAdminProfile> {
   late Future<RentalAdmin> _adminFuture;
 
   @override
@@ -33,7 +31,7 @@ class _PlatformAdminProfileState extends State<PlatformAdminProfile> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfileScreen(
+        builder: (context) => EditRentalAdminProfile(
           service: widget.service,
           admin: admin,
         ),
@@ -58,7 +56,7 @@ class _PlatformAdminProfileState extends State<PlatformAdminProfile> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Profil Administratora',
+          'Profil Administratora Wypożyczalni',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -147,7 +145,8 @@ class _PlatformAdminProfileState extends State<PlatformAdminProfile> {
                         child: ElevatedButton(
                           onPressed: _logout,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.error,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -198,22 +197,21 @@ class _PlatformAdminProfileState extends State<PlatformAdminProfile> {
   }
 }
 
-
-class EditProfileScreen extends StatefulWidget {
-  final RentalAdminService service;
+class EditRentalAdminProfile extends StatefulWidget {
+  final RentalService service;
   final RentalAdmin admin;
 
-  const EditProfileScreen({
+  const EditRentalAdminProfile({
     Key? key,
     required this.service,
     required this.admin,
   }) : super(key: key);
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _EditRentalAdminProfileState createState() => _EditRentalAdminProfileState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditRentalAdminProfileState extends State<EditRentalAdminProfile> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _surnameController;
@@ -247,59 +245,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    required String? Function(String?) validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-      ),
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      validator: validator,
-      style: const TextStyle(fontSize: 16),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -310,7 +255,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       body: Stack(
         children: [
-          // Tło z grafiką
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -404,6 +348,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.error,
+          ),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
+      style: const TextStyle(fontSize: 16),
     );
   }
 

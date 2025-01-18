@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/rental_admin_service.dart';
+import '../services/platform_admin_service.dart';
 import '../models/rental_admin_model.dart';
 import '../widgets/rental_admin_item.dart';
 import '../../shared/widgets/loading_indicator.dart';

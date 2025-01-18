@@ -3,7 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carrent_frontend/platform_admin/screens/rental_admin_list_screen.dart';
-import 'package:carrent_frontend/platform_admin/services/rental_admin_service.dart';
+import 'package:carrent_frontend/platform_admin/services/platform_admin_service.dart';
 import 'package:carrent_frontend/platform_admin/screens/platform_admin_profil_screen.dart';
 import 'package:carrent_frontend/platform_admin/screens/create_rental_admin_screen.dart';
 import 'package:carrent_frontend/platform_admin/screens/platform_admin_promotion_screen.dart';
