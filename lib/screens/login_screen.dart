@@ -8,7 +8,7 @@ import "package:carrent_frontend/platform_admin/screens/navigation_menu_platform
 
 class LoginWidget extends StatefulWidget {
   final String Function(String?) getHomeRoute;
-  
+
   const LoginWidget({super.key, required this.getHomeRoute});
 
   @override
@@ -281,14 +281,30 @@ class _LoginWidgetState extends State<LoginWidget>
                                   bool success = await _model.loginUser();
                                   if (success) {
                                     final String? userRole = _model.role;
+                                    final List<String>? rentalCompanyIds =
+                                        await _model.getRentalCompanyIds();
 
-                                    // Użycie przekazanej funkcji
+                                    if (userRole == 'employee' &&
+                                        (rentalCompanyIds == null ||
+                                            rentalCompanyIds.isEmpty)) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'No rental company ID found for employee')),
+                                      );
+                                      return;
+                                    }
+
                                     final String homeRoute =
                                         widget.getHomeRoute(userRole);
                                     print('Home route: $homeRoute');
                                     print('User role: $userRole');
+                                    print(
+                                        'RentalCompanyIds: $rentalCompanyIds');
+
                                     // Resetowanie indeksu nawigacji
-                                      if (!Get.isRegistered<
+                                    if (!Get.isRegistered<
                                         NavigationControllerPlatformAdmin>()) {
                                       Get.put(
                                           NavigationControllerPlatformAdmin());
@@ -297,6 +313,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                         NavigationControllerPlatformAdmin>();
                                     navigationController.selectedIndex.value =
                                         0;
+
                                     Navigator.pushReplacementNamed(
                                         context, homeRoute);
                                   } else {

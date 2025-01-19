@@ -112,7 +112,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                       },
 
                       onTap:
-                          () {}, // Opcjonalnie: dodaj akcję onTap, jeśli potrzebna
+                          () {},
                     );
                   },
                 );

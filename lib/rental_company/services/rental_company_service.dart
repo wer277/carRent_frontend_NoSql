@@ -185,8 +185,29 @@ class RentalCompanyService {
           json.decode(response.body)['message'] ?? 'Unknown error';
       throw Exception('Failed to update employee: $errorMessage');
     }
-    // Dla statusu 200 lub 204 nic nie rób, operacja zakończona sukcesem
   }
 
+  Future<Employee> getCurrentEmployee() async {
+    final token = await _getToken();
+    if (token == null) {
+      throw Exception('No access token found');
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/employee/current'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return Employee.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized request');
+    } else {
+      throw Exception('Failed to fetch employee data: ${response.body}');
+    }
+  }
 }
 

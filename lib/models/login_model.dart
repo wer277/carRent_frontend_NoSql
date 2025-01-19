@@ -16,6 +16,7 @@ class LoginModel {
 
   String? accessToken;
   String? role;
+  List<String>? rentalCompanyIds;
 
   LoginModel() {
     emailAddressTextController = TextEditingController();
@@ -63,10 +64,34 @@ class LoginModel {
 
         accessToken = responseData["access_token"];
         role = responseData["role"];
-        debugPrint("Access Token: $accessToken, Role: $role");
 
-        // Zapisz token i rolę w SharedPreferences
-        await _saveTokenAndRole(accessToken, role);
+        // Dekodowanie JWT, aby wyodrębnić rentalCompanyIds
+        if (accessToken != null) {
+          try {
+            final parts = accessToken!.split('.');
+            if (parts.length == 3) {
+              final payload = parts[1];
+              final normalized = base64.normalize(payload);
+              final payloadMap =
+                  json.decode(utf8.decode(base64.decode(normalized)));
+
+              if (payloadMap is Map && payloadMap["rentalCompanyIds"] != null) {
+                rentalCompanyIds =
+                    List<String>.from(payloadMap["rentalCompanyIds"]);
+              }
+            } else {
+              debugPrint("Invalid JWT token structure.");
+            }
+          } catch (e) {
+            debugPrint("Error decoding JWT: $e");
+          }
+        }
+
+        debugPrint("Access Token: $accessToken, Role: $role");
+        debugPrint("RentalCompanyIds: $rentalCompanyIds");
+
+        // Zapisz token, rolę i rentalCompanyIds (tylko dla employee) w SharedPreferences
+        await _saveUserData(accessToken, role, rentalCompanyIds);
 
         return true;
       } else {
@@ -81,11 +106,11 @@ class LoginModel {
 
   Future<void> _clearOldToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('access_token');
-    await prefs.remove('user_role');
+    await prefs.clear(); // Czyszczenie wszystkich zapisanych danych
   }
 
-  Future<void> _saveTokenAndRole(String? token, String? userRole) async {
+  Future<void> _saveUserData(
+      String? token, String? userRole, List<String>? rentalCompanyIds) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (token != null) {
@@ -97,8 +122,14 @@ class LoginModel {
       debugPrint("Saving role: $userRole");
       await prefs.setString('user_role', userRole);
     }
-  }
 
+    if (userRole == "employee" &&
+        rentalCompanyIds != null &&
+        rentalCompanyIds.isNotEmpty) {
+      debugPrint("Saving rentalCompanyIds: $rentalCompanyIds");
+      await prefs.setString('rentalCompanyIds', jsonEncode(rentalCompanyIds));
+    }
+  }
 
   Future<String?> getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -108,5 +139,14 @@ class LoginModel {
   Future<String?> getUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_role');
+  }
+
+  Future<List<String>?> getRentalCompanyIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rentalCompanyIdsJson = prefs.getString('rentalCompanyIds');
+    if (rentalCompanyIdsJson != null) {
+      return List<String>.from(json.decode(rentalCompanyIdsJson));
+    }
+    return null;
   }
 }

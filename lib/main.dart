@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:carrent_frontend/screens/login_screen.dart';
 import 'package:carrent_frontend/screens/register_screen.dart';
 import 'package:carrent_frontend/colors.dart';
@@ -16,11 +17,16 @@ import 'package:carrent_frontend/rental_company/services/rental_company_service.
 import 'package:carrent_frontend/rental_company/screens/create_rental_company_screen.dart';
 import 'package:carrent_frontend/rental_admin/services/rental_admin_service.dart';
 import 'package:carrent_frontend/employee/screens/employee_list_screen.dart';
+import 'package:carrent_frontend/vehicle/screens/create_vehicle_screen.dart';
+import 'package:carrent_frontend/vehicle/screens/vehicle_list_screen.dart';
+import 'package:carrent_frontend/vehicle/services/vehicle_service.dart';
+import 'package:carrent_frontend/employee/screens/navigation_menu_employee.dart';
+import 'package:carrent_frontend/employee/screens/employee_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-    // Czyszczenie zapisanych danych w SharedPreferences
+  // Czyszczenie SharedPreferences
   try {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -29,55 +35,44 @@ void main() async {
     print('Error clearing SharedPreferences: $e');
   }
 
-  try {
-    // Retrieve saved token and role
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
-    final role = prefs.getString('user_role');
-    print('Token from SharedPreferences: $token');
-    print('Role from SharedPreferences: $role');
+  // Inicjalizacja usług
+  final rentalService = RentalService(baseUrl: 'http://10.0.2.2:3000');
+  final rentalCompanyService =
+      RentalCompanyService(baseUrl: 'http://10.0.2.2:3000');
+  final platformAdminService =
+      RentalAdminService(baseUrl: 'http://10.0.2.2:3000');
+  final vehicleService = VehicleService(baseUrl: 'http://10.0.2.2:3000');
 
-    // Initialize services
-    final rentalService = RentalService(baseUrl: 'http://10.0.2.2:3000');
-    final rentalCompanyService =
-        RentalCompanyService(baseUrl: 'http://10.0.2.2:3000');
-    final platformAdminService =
-        RentalAdminService(baseUrl: 'http://10.0.2.2:3000');
-
-    // Run the app
-    runApp(MyApp(
-      token: token,
-      role: role,
-      rentalService: rentalService,
-      rentalCompanyService: rentalCompanyService,
-      platformAdminService: platformAdminService,
-    ));
-  } catch (e) {
-    print('Error initializing app: $e');
-    runApp(const MyApp(
-      token: null,
-      role: null,
-      rentalService: null,
-      rentalCompanyService: null,
-      platformAdminService: null,
-    ));
-  }
+  // Uruchomienie aplikacji bez zapisanego tokenu i roli
+  runApp(MyApp(
+    token: null,
+    role: null,
+    rentalCompanyId: null,
+    rentalService: rentalService,
+    rentalCompanyService: rentalCompanyService,
+    platformAdminService: platformAdminService,
+    vehicleService: vehicleService,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final String? token;
   final String? role;
+  final String? rentalCompanyId;
   final RentalService? rentalService;
   final RentalCompanyService? rentalCompanyService;
   final RentalAdminService? platformAdminService;
+  final VehicleService? vehicleService;
 
   const MyApp({
     super.key,
     required this.token,
     required this.role,
+    required this.rentalCompanyId,
     required this.rentalService,
     required this.rentalCompanyService,
     required this.platformAdminService,
+    required this.vehicleService,
   });
 
   @override
@@ -95,15 +90,14 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: token == null ? 'Login' : _getHomeRoute(role),
+      initialRoute: 'Login', // Zawsze rozpoczynamy od ekranu logowania
       routes: {
         'Register': (context) => const RegisterWidget(),
         'Login': (context) => LoginWidget(getHomeRoute: _getHomeRoute),
 
-        // Routes for roles
+        // Routes for different roles
         'ClientHome': (context) => const ClientHomeScreen(),
-        'NavigationMenuRentalAdmin': (context) =>
-            NavigationMenuRentalCompany(),
+        'NavigationMenuRentalAdmin': (context) => NavigationMenuRentalCompany(),
         'NavigationMenuPlatformAdmin': (context) =>
             NavigationMenuPlatformAdmin(),
 
@@ -125,10 +119,21 @@ class MyApp extends StatelessWidget {
         // Employee screens
         'EmployeeListScreen': (context) => EmployeeListScreen(
               service: rentalCompanyService!,
-              rentalCompanyId: '1',
+              rentalCompanyId: rentalCompanyId ?? '',
+            ),
+
+        // Vehicle screens
+        'VehicleListScreen': (context) =>
+            VehicleListScreen(service: vehicleService!),
+        'CreateVehicleScreen': (context) => CreateVehicleScreen(
+              service: vehicleService!,
+              rentalCompanyId: rentalCompanyId ?? '',
+            ),
+        'NavigationMenuEmployee': (context) => NavigationMenuEmployee(),
+        'EmployeeProfileScreen': (context) => EmployeeProfileScreen(
+              service: rentalCompanyService!,
             ),
       },
-      // Handle unknown routes
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
           builder: (context) => Scaffold(
@@ -141,7 +146,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  // Determine default route based on role
+  // Determine default route based on role (nie jest już używane w tym scenariuszu)
   String _getHomeRoute(String? role) {
     print('Determining home route for role: $role');
     switch (role) {
@@ -150,7 +155,7 @@ class MyApp extends StatelessWidget {
       case 'rental_admin':
         return 'NavigationMenuRentalAdmin';
       case 'employee':
-        return 'EmployeeHome';
+        return 'NavigationMenuEmployee';
       default:
         return 'ClientHome';
     }
