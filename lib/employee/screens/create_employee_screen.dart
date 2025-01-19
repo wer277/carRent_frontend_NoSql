@@ -1,67 +1,59 @@
+// screens/create_employee_screen.dart
 import 'package:flutter/material.dart';
-import '../services/platform_admin_service.dart';
-import '../models/rental_admin_model.dart';
+import '../../rental_company/services/rental_company_service.dart';
 
-class EditRentalAdminScreen extends StatefulWidget {
-  final RentalAdmin admin;
-  final RentalAdminService service;
+class CreateEmployeeScreen extends StatefulWidget {
+  final RentalCompanyService service;
+  final String rentalCompanyId;
 
-  const EditRentalAdminScreen({
+  const CreateEmployeeScreen({
     Key? key,
-    required this.admin,
     required this.service,
+    required this.rentalCompanyId,
   }) : super(key: key);
 
   @override
-  State<EditRentalAdminScreen> createState() => _EditRentalAdminScreenState();
+  State<CreateEmployeeScreen> createState() => _CreateEmployeeScreenState();
 }
 
-class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
+class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _surnameController;
-  late TextEditingController _emailController;
-  String? _password;
   bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    // Inicjalizacja kontrolerów z danymi przekazanego administratora
-    _nameController = TextEditingController(text: widget.admin.name);
-    _surnameController = TextEditingController(text: widget.admin.surname);
-    _emailController = TextEditingController(text: widget.admin.email);
+  void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _updateRentalAdmin() async {
+  Future<void> _createEmployee() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
-      _formKey.currentState?.save();
-
-      // Przygotowanie danych do aktualizacji
-      Map<String, dynamic> updateData = {
-        'name': _nameController.text,
-        'surname': _surnameController.text,
-        'email': _emailController.text,
-      };
-
-      // Dodaj hasło do danych, jeśli zostało wprowadzone
-      if (_password != null && _password!.isNotEmpty) {
-        updateData['password'] = _password;
-      }
-
       try {
-        await widget.service.updateRentalAdmin(
-          widget.admin.id, // Używamy id z obiektu admin
-          updateData,
-        );
+        await widget.service.createEmployee({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+          'name': _nameController.text.trim(),
+          'surname': _surnameController.text.trim(),
+          'rentalCompanyId': widget.rentalCompanyId,
+        });
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Admin data updated successfully'),
+              content: Text('Employee created successfully'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
             ),
           );
           Navigator.of(context).pop();
@@ -70,9 +62,10 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Update failed: $e'),
+              content: Text('Failed to create employee: $e'),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
             ),
           );
         }
@@ -85,18 +78,23 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required IconData icon,
-    String? initialValue,
     TextInputType? keyboardType,
     bool obscureText = false,
-    required Function(String?) onSaved,
+    Widget? suffixIcon,
     required String? Function(String?) validator,
   }) {
     return TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
@@ -125,10 +123,8 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
         filled: true,
         fillColor: Colors.grey.shade50,
       ),
-      initialValue: initialValue,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      onSaved: onSaved,
       validator: validator,
       style: const TextStyle(fontSize: 16),
     );
@@ -139,7 +135,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Edycja profilu rental_admin',
+          'Create Employee',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -148,6 +144,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
       ),
       body: Stack(
         children: [
+          // Background image
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -159,6 +156,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
               ),
             ),
           ),
+          // Form content
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -178,16 +176,14 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                           child: Column(
                             children: [
                               _buildTextField(
+                                controller: _nameController,
                                 label: 'Name',
                                 icon: Icons.person_outline,
-                                initialValue: _nameController.text,
-                                onSaved: (value) =>
-                                    _nameController.text = value ?? '',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Name is required';
                                   }
-                                  if (value.length < 2) {
+                                  if (value.trim().length < 2) {
                                     return 'Name must be at least 2 characters';
                                   }
                                   return null;
@@ -195,16 +191,14 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
+                                controller: _surnameController,
                                 label: 'Surname',
                                 icon: Icons.person,
-                                initialValue: _surnameController.text,
-                                onSaved: (value) =>
-                                    _surnameController.text = value ?? '',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Surname is required';
                                   }
-                                  if (value.length < 2) {
+                                  if (value.trim().length < 2) {
                                     return 'Surname must be at least 2 characters';
                                   }
                                   return null;
@@ -212,35 +206,52 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
+                                controller: _emailController,
                                 label: 'Email',
                                 icon: Icons.email_outlined,
-                                initialValue: _emailController.text,
                                 keyboardType: TextInputType.emailAddress,
-                                onSaved: (value) =>
-                                    _emailController.text = value ?? '',
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Adres e-mail jest wymagany';
+                                    return 'Email is required';
                                   }
                                   final emailRegex = RegExp(
                                     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
                                   );
-                                  if (!emailRegex.hasMatch(value)) {
-                                    return 'Proszę podać prawidłowy adres e-mail';
+                                  if (!emailRegex.hasMatch(value.trim())) {
+                                    return 'Please enter a valid email';
                                   }
                                   return null;
                                 },
                               ),
                               const SizedBox(height: 16),
                               _buildTextField(
-                                label: 'New Password',
+                                controller: _passwordController,
+                                label: 'Password',
                                 icon: Icons.lock_outline,
-                                obscureText: true,
-                                onSaved: (value) => _password = value,
+                                obscureText: _obscurePassword,
                                 validator: (value) {
-                                  // Hasło jest opcjonalne
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password is required';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
                                   return null;
                                 },
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
                               ),
                             ],
                           ),
@@ -250,7 +261,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _updateRentalAdmin,
+                          onPressed: _isLoading ? null : _createEmployee,
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
                                 Theme.of(context).colorScheme.primary,
@@ -271,7 +282,7 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Zapisz zmiany',
+                                  'Create Account',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

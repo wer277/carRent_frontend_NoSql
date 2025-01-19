@@ -1,3 +1,4 @@
+// screens/rental_admin_list_screen.dart
 import 'package:flutter/material.dart';
 import '../services/platform_admin_service.dart';
 import '../models/rental_admin_model.dart';
@@ -45,12 +46,12 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
     }
   }
 
-  void _navigateToEditScreen(String rentalAdminId) {
+  void _navigateToEditScreen(RentalAdmin admin) {
     Navigator.of(context)
         .push(
           MaterialPageRoute(
             builder: (context) => EditRentalAdminScreen(
-              rentalAdminId: rentalAdminId,
+              admin: admin, // Przekazujemy cały obiekt admina
               service: widget.service,
             ),
           ),
@@ -72,19 +73,17 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
       ),
       body: Stack(
         children: [
-          // Tło z grafiką
           Center(
             child: Opacity(
-              opacity: 0.3, // Ustawienie przezroczystości na 30%
+              opacity: 0.3,
               child: Image.asset(
-                'assets/images/tloListView.png', // Ścieżka do obrazu
-                fit: BoxFit.cover, // Dopasowanie obrazu
+                'assets/images/tloListView.png',
+                fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
               ),
             ),
           ),
-          // Zawartość ekranu
           FutureBuilder<List<RentalAdmin>>(
             future: _rentalAdmins,
             builder: (context, snapshot) {
@@ -104,7 +103,8 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
                     return RentalAdminItem(
                       rentalAdmin: admin,
                       onDelete: () => _deleteRentalAdmin(admin.id),
-                      onEdit: () => _navigateToEditScreen(admin.id),
+                      onEdit: () =>
+                          _navigateToEditScreen(admin), // Przekaż cały obiekt
                     );
                   },
                 );

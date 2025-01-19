@@ -1,19 +1,18 @@
-// widgets/rental_company_item.dart
 import 'package:flutter/material.dart';
-import '../models/rental_company_model.dart';
+import '../models/employee_model.dart';
 
-class RentalCompanyItem extends StatelessWidget {
-  final RentalCompany rentalCompany;
+class EmployeeItem extends StatelessWidget {
+  final Employee employee;
   final VoidCallback onDelete;
-  final VoidCallback onEdit;
-  final VoidCallback onTap;
+  final VoidCallback onEdit; // Dodaj callback dla edycji
+  final VoidCallback? onTap;
 
-  const RentalCompanyItem({
+  const EmployeeItem({
     Key? key,
-    required this.rentalCompany,
+    required this.employee,
     required this.onDelete,
-    required this.onEdit,
-    required this.onTap,
+    required this.onEdit, // Dodaj do konstruktora
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -21,8 +20,8 @@ class RentalCompanyItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ListTile(
-        title: Text(rentalCompany.name),
-        subtitle: Text(rentalCompany.contactEmail),
+        title: Text('${employee.firstName} ${employee.lastName}'),
+        subtitle: Text(employee.email),
         onTap: onTap,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

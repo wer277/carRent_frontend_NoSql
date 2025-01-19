@@ -1,3 +1,4 @@
+// rental_company_list_screen.dart
 import 'package:flutter/material.dart';
 import '../services/rental_company_service.dart';
 import '../models/rental_company_model.dart';
@@ -5,6 +6,7 @@ import '../widgets/rental_company_item.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
 import 'edit_rental_company_screen.dart';
+import '../../employee/screens/employee_list_screen.dart'; // Import EmployeeListScreen
 
 class RentalCompanyListScreen extends StatefulWidget {
   final RentalCompanyService service;
@@ -59,6 +61,17 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
         .then((_) => _loadRentalCompanies()); // Reload list after editing
   }
 
+  void _navigateToEmployeeList(String rentalCompanyId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EmployeeListScreen(
+          service: widget.service,
+          rentalCompanyId: rentalCompanyId,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,6 +120,8 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
                       rentalCompany: company,
                       onDelete: () => _deleteRentalCompany(company.id),
                       onEdit: () => _navigateToEditScreen(company),
+                      // Modify onTap to navigate to employee list
+                      onTap: () => _navigateToEmployeeList(company.id),
                     );
                   },
                 );

@@ -4,7 +4,6 @@ import 'package:carrent_frontend/screens/login_screen.dart';
 import 'package:carrent_frontend/screens/register_screen.dart';
 import 'package:carrent_frontend/colors.dart';
 import 'package:carrent_frontend/client/screens/client_home_screen.dart';
-import 'package:carrent_frontend/employee/screens/employee_home_screen.dart';
 import 'package:carrent_frontend/rental_admin/screens/navigation_menu_rental_admin.dart';
 import 'package:carrent_frontend/platform_admin/screens/navigation_menu_platform_admin.dart';
 import 'package:carrent_frontend/platform_admin/screens/rental_admin_list_screen.dart';
@@ -16,6 +15,7 @@ import 'package:carrent_frontend/rental_company/screens/rental_company_list_scre
 import 'package:carrent_frontend/rental_company/services/rental_company_service.dart';
 import 'package:carrent_frontend/rental_company/screens/create_rental_company_screen.dart';
 import 'package:carrent_frontend/rental_admin/services/rental_admin_service.dart';
+import 'package:carrent_frontend/employee/screens/employee_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -102,7 +102,6 @@ class MyApp extends StatelessWidget {
 
         // Routes for roles
         'ClientHome': (context) => const ClientHomeScreen(),
-        'EmployeeHome': (context) => const EmployeeHomeScreen(),
         'NavigationMenuRentalAdmin': (context) =>
             NavigationMenuRentalCompany(),
         'NavigationMenuPlatformAdmin': (context) =>
@@ -122,6 +121,12 @@ class MyApp extends StatelessWidget {
             RentalCompanyListScreen(service: rentalCompanyService!),
         'CreateRentalCompany': (context) =>
             CreateRentalCompanyScreen(service: rentalCompanyService!),
+
+        // Employee screens
+        'EmployeeListScreen': (context) => EmployeeListScreen(
+              service: rentalCompanyService!,
+              rentalCompanyId: '1',
+            ),
       },
       // Handle unknown routes
       onUnknownRoute: (settings) {

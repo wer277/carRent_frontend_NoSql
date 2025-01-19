@@ -50,11 +50,11 @@ class NavigationMenuRentalCompany extends StatelessWidget {
                   NavigationDestination(
                       icon: Icon(Iconsax.home), label: 'Home'),
                   NavigationDestination(
-                      icon: Icon(Iconsax.buildings), label: 'Profile'),
+                      icon: Icon(Iconsax.buildings), label: 'Add'),
                   NavigationDestination(
-                      icon: Icon(Iconsax.add), label: 'Dodaj'),
-                  NavigationDestination(
-                      icon: Icon(Iconsax.user), label: 'Profil'),
+                      icon: Icon(Iconsax.add), label: 'Profile'),
+                  //NavigationDestination(
+                   //   icon: Icon(Iconsax.user), label: 'Profil'),
                 ],
               ),
             ),
@@ -91,8 +91,8 @@ class NavigationControllerRentalCompany extends GetxController {
       CreateRentalCompanyScreen(
           service: rentalCompanyService), // index 2: Tworzenie wypożyczalni
       RentalAdminProfile(service: rentalAdminService),
-      RentalAdminProfile(
-          service: rentalAdminService), // index 3: Profil rental_admin
+      //RentalAdminProfile(
+       //   service: rentalAdminService), // index 3: Profil rental_admin
     ];
 
     return screens[selectedIndex.value];
