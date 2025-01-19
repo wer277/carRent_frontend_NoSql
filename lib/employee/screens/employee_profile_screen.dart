@@ -25,14 +25,14 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
   }
 
   void _loadEmployeeData() {
-    _employeeFuture = widget.service.getCurrentEmployee();
+    _employeeFuture = widget.service.getEmployeeProfile();
   }
 
   Future<void> _navigateToEditProfile(Employee employee) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditEmployeeProfile(
+        builder: (context) => EditEmployeeProfileScreen(
           service: widget.service,
           employee: employee,
         ),
@@ -107,10 +107,10 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
-                              _buildInfoRow('First Name', employee.firstName),
+                              _buildInfoRow('First Name', employee.name),
                               Divider(
                                   color: Theme.of(context).colorScheme.primary),
-                              _buildInfoRow('Last Name', employee.lastName),
+                              _buildInfoRow('Last Name', employee.surname),
                               Divider(
                                   color: Theme.of(context).colorScheme.primary),
                               _buildInfoRow('Email', employee.email),
@@ -196,50 +196,50 @@ class _EmployeeProfileScreenState extends State<EmployeeProfileScreen> {
   }
 }
 
-class EditEmployeeProfile extends StatefulWidget {
+class EditEmployeeProfileScreen extends StatefulWidget {
   final RentalCompanyService service;
   final Employee employee;
 
-  const EditEmployeeProfile({
+  const EditEmployeeProfileScreen({
     Key? key,
     required this.service,
     required this.employee,
   }) : super(key: key);
 
   @override
-  _EditEmployeeProfileState createState() => _EditEmployeeProfileState();
+  _EditEmployeeProfileScreenState createState() => _EditEmployeeProfileScreenState();
 }
 
-class _EditEmployeeProfileState extends State<EditEmployeeProfile> {
+class _EditEmployeeProfileScreenState extends State<EditEmployeeProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
+  late TextEditingController _nameController;
+  late TextEditingController _surnameController;
   late TextEditingController _emailController;
 
   @override
   void initState() {
     super.initState();
-    _firstNameController =
-        TextEditingController(text: widget.employee.firstName);
-    _lastNameController = TextEditingController(text: widget.employee.lastName);
+    _nameController = TextEditingController(text: widget.employee.name);
+    _surnameController = TextEditingController(text: widget.employee.surname);
     _emailController = TextEditingController(text: widget.employee.email);
   }
 
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await widget.service.updateEmployee(widget.employee.id, {
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
-          'email': _emailController.text,
+        await widget.service.updateEmployeeProfile({
+          'name': _nameController.text.trim(),
+          'surname': _surnameController.text.trim(),
+          'email': _emailController.text.trim(),
         });
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          const SnackBar(content: Text('Profil zaktualizowany pomyślnie')),
         );
         Navigator.pop(context, true);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile: $e')),
+          SnackBar(content: Text('Nie udało się zaktualizować profilu: $e')),
         );
       }
     }
@@ -249,56 +249,132 @@ class _EditEmployeeProfileState extends State<EditEmployeeProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: const Text('Edytuj profil'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildTextField('First Name', _firstNameController, Icons.person),
-              const SizedBox(height: 16),
-              _buildTextField('Last Name', _lastNameController, Icons.person),
-              const SizedBox(height: 16),
-              _buildTextField('Email', _emailController, Icons.email),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _updateProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+      body: Stack(
+        children: [
+          Center(
+            child: Opacity(
+              opacity: 0.3,
+              child: Image.asset(
+                'assets/images/tloListView.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
-                    'Save Changes',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildTextField(
+                          controller: _nameController,
+                          label: 'Imię',
+                          icon: Icons.person_outline,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Proszę wprowadzić imię';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _surnameController,
+                          label: 'Nazwisko',
+                          icon: Icons.person,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Proszę wprowadzić nazwisko';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Proszę wprowadzić email';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Proszę wprowadzić poprawny adres email';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: _updateProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Zapisz zmiany',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField(
-      String label, TextEditingController controller, IconData icon) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    required String? Function(String?) validator,
+  }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
-      validator: (value) => value!.isEmpty ? 'Please enter $label' : null,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
     );
   }
 }

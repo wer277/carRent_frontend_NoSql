@@ -2,9 +2,9 @@ class Vehicle {
   final String id;
   final String brand;
   final String model;
-  final String productionYear;
+  final int productionYear;
   final String location;
-  final String dailyPrice;
+  final double dailyPrice;
   final String status;
   final String rentalCompanyId;
 
@@ -19,16 +19,21 @@ class Vehicle {
     required this.rentalCompanyId,
   });
 
-  factory Vehicle.fromJson(Map<String, dynamic> json) {
+factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
-      id: json['_id'],
-      brand: json['brand'],
-      model: json['model'],
-      productionYear: json['productionYear'],
-      location: json['location'],
-      dailyPrice: json['dailyPrice'].toString(),
-      status: json['status'],
-      rentalCompanyId: json['rentalCompanyId'],
+      id: json['_id'] as String,
+      brand: json['brand'] as String,
+      model: json['model'] as String,
+      productionYear: json['productionYear'] is int
+          ? json['productionYear'] as int
+          : int.parse(json['productionYear'].toString()),
+      location: json['location'] as String,
+      dailyPrice: json['dailyPrice'] is double
+          ? json['dailyPrice'] as double
+          : double.parse(json['dailyPrice'].toString()),
+      status: json['status'] as String,
+      rentalCompanyId: json['rentalCompanyId']?.toString() ?? '',
     );
   }
+
 }

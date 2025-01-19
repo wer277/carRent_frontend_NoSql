@@ -187,27 +187,50 @@ class RentalCompanyService {
     }
   }
 
-  Future<Employee> getCurrentEmployee() async {
+
+ Future<Employee> getEmployeeProfile() async {
     final token = await _getToken();
-    if (token == null) {
-      throw Exception('No access token found');
-    }
+    if (token == null) throw Exception('No access token found');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/employee/current'),
+      Uri.parse('$baseUrl/employee/profile'),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
 
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
       return Employee.fromJson(json.decode(response.body));
-    } else if (response.statusCode == 401) {
-      throw Exception('Unauthorized request');
     } else {
-      throw Exception('Failed to fetch employee data: ${response.body}');
+      throw Exception('Failed to load profile: ${response.body}');
     }
   }
+
+
+  Future<void> updateEmployeeProfile(Map<String, dynamic> updateData) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No access token found');
+
+    final response = await http.patch(
+      Uri.parse('$baseUrl/employee/update-profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(updateData),
+    );
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update profile: ${response.body}');
+    }
+  }
+
 }
 

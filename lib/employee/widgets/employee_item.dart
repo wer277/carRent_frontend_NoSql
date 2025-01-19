@@ -20,7 +20,7 @@ class EmployeeItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ListTile(
-        title: Text('${employee.firstName} ${employee.lastName}'),
+        title: Text('${employee.name} ${employee.surname}'),
         subtitle: Text(employee.email),
         onTap: onTap,
         trailing: Row(

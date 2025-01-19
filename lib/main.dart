@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carrent_frontend/screens/login_screen.dart';
 import 'package:carrent_frontend/screens/register_screen.dart';
 import 'package:carrent_frontend/colors.dart';
@@ -26,7 +26,7 @@ import 'package:carrent_frontend/employee/screens/employee_profile_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Czyszczenie SharedPreferences
+  // Czyszczenie SharedPreferences przed uruchomieniem aplikacji
   try {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -36,44 +36,64 @@ void main() async {
   }
 
   // Inicjalizacja usług
-  final rentalService = RentalService(baseUrl: 'http://10.0.2.2:3000');
   final rentalCompanyService =
       RentalCompanyService(baseUrl: 'http://10.0.2.2:3000');
   final platformAdminService =
       RentalAdminService(baseUrl: 'http://10.0.2.2:3000');
   final vehicleService = VehicleService(baseUrl: 'http://10.0.2.2:3000');
 
-  // Uruchomienie aplikacji bez zapisanego tokenu i roli
   runApp(MyApp(
-    token: null,
-    role: null,
-    rentalCompanyId: null,
-    rentalService: rentalService,
     rentalCompanyService: rentalCompanyService,
     platformAdminService: platformAdminService,
     vehicleService: vehicleService,
   ));
 }
 
-class MyApp extends StatelessWidget {
-  final String? token;
-  final String? role;
-  final String? rentalCompanyId;
-  final RentalService? rentalService;
-  final RentalCompanyService? rentalCompanyService;
-  final RentalAdminService? platformAdminService;
-  final VehicleService? vehicleService;
+class MyApp extends StatefulWidget {
+  final RentalCompanyService rentalCompanyService;
+  final RentalAdminService platformAdminService;
+  final VehicleService vehicleService;
 
   const MyApp({
     super.key,
-    required this.token,
-    required this.role,
-    required this.rentalCompanyId,
-    required this.rentalService,
     required this.rentalCompanyService,
     required this.platformAdminService,
     required this.vehicleService,
   });
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String? token;
+  String? role;
+  String? rentalCompanyId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('access_token');
+      role = prefs.getString('role');
+      final rentalCompanyIdsJson = prefs.getString('rentalCompanyIds');
+      if (rentalCompanyIdsJson != null) {
+        try {
+          final decoded = json.decode(rentalCompanyIdsJson);
+          rentalCompanyId = (decoded as List<dynamic>).isNotEmpty
+              ? decoded.first.toString()
+              : null;
+        } catch (e) {
+          print('Error decoding rentalCompanyIds: $e');
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +110,12 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      initialRoute: 'Login', // Zawsze rozpoczynamy od ekranu logowania
+      initialRoute: token == null ? 'Login' : _getHomeRoute(role),
       routes: {
         'Register': (context) => const RegisterWidget(),
         'Login': (context) => LoginWidget(getHomeRoute: _getHomeRoute),
 
-        // Routes for different roles
+        // Routes based on roles
         'ClientHome': (context) => const ClientHomeScreen(),
         'NavigationMenuRentalAdmin': (context) => NavigationMenuRentalCompany(),
         'NavigationMenuPlatformAdmin': (context) =>
@@ -103,36 +123,35 @@ class MyApp extends StatelessWidget {
 
         // Platform admin screens
         'RentalPlatformProfile': (context) =>
-            PlatformAdminProfile(service: platformAdminService!),
+            PlatformAdminProfile(service: widget.platformAdminService),
         'CreateRentalAdminScreen': (context) =>
-            CreateRentalAdminScreen(service: platformAdminService!),
+            CreateRentalAdminScreen(service: widget.platformAdminService),
         'PromotionsScreen': (context) => const PromotionsScreen(),
         'RentalAdminScreenView': (context) =>
-            RentalAdminListScreen(service: platformAdminService!),
+            RentalAdminListScreen(service: widget.platformAdminService),
 
         // Rental company screens
         'RentalCompanyListScreen': (context) =>
-            RentalCompanyListScreen(service: rentalCompanyService!),
+            RentalCompanyListScreen(service: widget.rentalCompanyService),
         'CreateRentalCompany': (context) =>
-            CreateRentalCompanyScreen(service: rentalCompanyService!),
+            CreateRentalCompanyScreen(service: widget.rentalCompanyService),
 
         // Employee screens
         'EmployeeListScreen': (context) => EmployeeListScreen(
-              service: rentalCompanyService!,
+              service: widget.rentalCompanyService,
               rentalCompanyId: rentalCompanyId ?? '',
             ),
 
         // Vehicle screens
         'VehicleListScreen': (context) =>
-            VehicleListScreen(service: vehicleService!),
+            VehicleListScreen(service: widget.vehicleService),
         'CreateVehicleScreen': (context) => CreateVehicleScreen(
-              service: vehicleService!,
+              service: widget.vehicleService,
               rentalCompanyId: rentalCompanyId ?? '',
             ),
         'NavigationMenuEmployee': (context) => NavigationMenuEmployee(),
-        'EmployeeProfileScreen': (context) => EmployeeProfileScreen(
-              service: rentalCompanyService!,
-            ),
+        'EmployeeProfileScreen': (context) =>
+            EmployeeProfileScreen(service: widget.rentalCompanyService),
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(
@@ -146,7 +165,6 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  // Determine default route based on role (nie jest już używane w tym scenariuszu)
   String _getHomeRoute(String? role) {
     print('Determining home route for role: $role');
     switch (role) {

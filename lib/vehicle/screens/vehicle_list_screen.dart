@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/vehicle_service.dart';
 import '../models/vehicle_model.dart';
 import '../widgets/vehicle_item.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
+import 'edit_vehicle_screen.dart';
 
 class VehicleListScreen extends StatefulWidget {
   final VehicleService service;
@@ -31,7 +34,7 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
   void _deleteVehicle(String id) async {
     try {
-      // Tutaj można dodać funkcję do usuwania pojazdu z serwisu
+      await widget.service.deleteVehicle(id);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vehicle deleted successfully')),
       );
@@ -41,6 +44,23 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
         SnackBar(content: Text('Failed to delete vehicle: $e')),
       );
     }
+  }
+
+  Future<String?> _getRentalCompanyIdFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rentalCompanyIdsJson = prefs.getString('rentalCompanyIds');
+    if (rentalCompanyIdsJson == null) return null;
+
+    try {
+      final decoded = json.decode(rentalCompanyIdsJson);
+      final List<dynamic> idsDynamic = decoded;
+      if (idsDynamic.isNotEmpty) {
+        return idsDynamic.first.toString();
+      }
+    } catch (e) {
+      debugPrint('Error decoding rentalCompanyIds: $e');
+    }
+    return null;
   }
 
   @override
@@ -78,7 +98,13 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                   message: 'Failed to load vehicles: ${snapshot.error}',
                 );
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('Brak pojazdów'));
+                return const Center(
+                  child: Text(
+                    'Brak pojazdów. Dodaj nowy pojazd z poziomu menu.',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                );
               } else {
                 final vehicles = snapshot.data!;
                 return ListView.builder(
@@ -88,7 +114,19 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                     return VehicleItem(
                       vehicle: vehicle,
                       onEdit: () {
-                        // Przekierowanie do edycji
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditVehicleScreen(
+                              vehicle: vehicle,
+                              service: widget.service,
+                            ),
+                          ),
+                        ).then((value) {
+                          if (value == true) {
+                            _loadVehicles();
+                          }
+                        });
                       },
                       onDelete: () => _deleteVehicle(vehicle.id),
                     );

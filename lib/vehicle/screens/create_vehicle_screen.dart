@@ -11,6 +11,8 @@ class CreateVehicleScreen extends StatefulWidget {
     required this.rentalCompanyId,
   }) : super(key: key);
 
+  static const routeName = 'CreateVehicle';
+
   @override
   State<CreateVehicleScreen> createState() => _CreateVehicleScreenState();
 }
@@ -63,9 +65,14 @@ class _CreateVehicleScreenState extends State<CreateVehicleScreen> {
             const SnackBar(
               content: Text('Vehicle created successfully'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
             ),
           );
-          Navigator.pop(context, true);
+
+          Navigator.of(context).popUntil((route) {
+            return route.settings.name == 'VehicleList' || route.isFirst;
+          });
         }
       } catch (e) {
         if (mounted) {
@@ -73,11 +80,15 @@ class _CreateVehicleScreenState extends State<CreateVehicleScreen> {
             SnackBar(
               content: Text('Failed to create vehicle: $e'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
             ),
           );
         }
       } finally {
-        if (mounted) setState(() => _isLoading = false);
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
   }
@@ -86,10 +97,7 @@ class _CreateVehicleScreenState extends State<CreateVehicleScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Create Vehicle',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Create Vehicle'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),

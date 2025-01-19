@@ -1,23 +1,41 @@
-// models/employee_model.dart
 class Employee {
   final String id;
+  final String name;
+  final String surname;
   final String email;
-  final String firstName;
-  final String lastName;
+  final String?
+      rentalCompanyId; // Opcjonalne pole, jeśli nie zawsze jest zwracane
 
   Employee({
     required this.id,
+    required this.name,
+    required this.surname,
     required this.email,
-    required this.firstName,
-    required this.lastName,
+    this.rentalCompanyId,
   });
 
-  factory Employee.fromJson(Map<String, dynamic> json) {
+factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
-      id: json['_id'] as String,
-      email: json['email'] as String,
-      firstName: json['name'] as String,
-      lastName: json['surname'] as String,
+      id: json['_id'] ?? '',
+      name: json['name'] ?? json['firstName'] ?? 'No name provided',
+      surname: json['surname'] ?? json['lastName'] ?? 'No surname provided',
+      email: json['email'] ?? 'No email provided',
+      rentalCompanyId: json['rentalCompanyIds'] != null &&
+              (json['rentalCompanyIds'] as List).isNotEmpty
+          ? json['rentalCompanyIds'][0]
+          : null,
     );
+  }
+
+
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'surname': surname,
+      'email': email,
+      'rentalCompanyId': rentalCompanyId,
+    };
   }
 }
