@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:carrent_frontend/colors.dart';
 import '../models/login_model.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:carrent_frontend/colors.dart';
+import "package:carrent_frontend/platform_admin/screens/navigation_menu_platform_admin.dart";
 
 class LoginWidget extends StatefulWidget {
-  const LoginWidget({super.key});
+  final String Function(String?, bool?) getHomeRoute;
+
+  const LoginWidget({super.key, required this.getHomeRoute});
 
   @override
   State<LoginWidget> createState() => _LoginWidgetState();
@@ -45,8 +50,8 @@ class _LoginWidgetState extends State<LoginWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).primaryColor,
-                tertiaryColor, // Zamiast koloru tertiary
+                gradient1Color,
+                gradient2Color,
               ],
               stops: const [0, 1],
               begin: const AlignmentDirectional(0.87, -1),
@@ -252,8 +257,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                             .textTheme
                                             .titleMedium
                                             ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
+                                              color: primaryColor,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
@@ -273,34 +277,33 @@ class _LoginWidgetState extends State<LoginWidget>
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0, 0, 0, 16),
                               child: ElevatedButton(
-                               onPressed: () async {
+                                onPressed: () async {
                                   bool success = await _model.loginUser();
                                   if (success) {
-                                    // Załóżmy, że w momencie logowania (metoda _model.loginUser())
-                                    // pobierasz z backendu rolę i przechowujesz ją we właściwości _model.role
-                                    // np. _model.role może przyjąć wartość "client", "employee", "rental_admin", "platform_admin"
-
                                     final String? userRole = _model.role;
+                                    final List<String>? rentalCompanyIds =
+                                        await _model.getRentalCompanyIds();
+                                    final bool? isProfileComplete = await _model
+                                            .getProfileCompletionStatus() ??
+                                        true;
 
-                                    if (userRole == 'client') {
-                                      Navigator.pushReplacementNamed(
-                                          context, 'NavigationMenu');
-                                    } else if (userRole == 'employee') {
-                                      Navigator.pushReplacementNamed(
-                                          context, 'EmployeeHome');
-                                    } else if (userRole == 'rental_admin') {
-                                      Navigator.pushReplacementNamed(
-                                          context, 'NavigationMenuRentalAdmin');
-                                    } else if (userRole == 'platform_admin') {
-                                      Navigator.pushReplacementNamed(
-                                          context, 'PlatformAdminHome');
-                                    } else {
+                                    if (userRole == 'employee' &&
+                                        (rentalCompanyIds == null ||
+                                            rentalCompanyIds.isEmpty)) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(
-                                            content: Text('Unknown role')),
+                                            content: Text(
+                                                'No rental company ID found for employee')),
                                       );
+                                      return;
                                     }
+
+                                    final String homeRoute =
+                                        widget.getHomeRoute(
+                                            userRole, isProfileComplete);
+                                    Navigator.pushReplacementNamed(
+                                        context, homeRoute);
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -310,8 +313,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                 },
                                 style: ElevatedButton.styleFrom(
                                   minimumSize: const Size(double.infinity, 44),
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  backgroundColor: primaryColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -424,8 +426,7 @@ class _LoginWidgetState extends State<LoginWidget>
                                             .textTheme
                                             .titleMedium
                                             ?.copyWith(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
+                                              color: primaryColor,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),

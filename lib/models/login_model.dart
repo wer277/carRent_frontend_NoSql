@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginModel {
   late TextEditingController emailAddressTextController;
@@ -13,9 +14,16 @@ class LoginModel {
 
   final String _baseUrl = "http://10.0.2.2:3000/auth";
 
-  // Dodane pola
   String? accessToken;
   String? role;
+  List<String>? rentalCompanyIds;
+
+  LoginModel() {
+    emailAddressTextController = TextEditingController();
+    emailAddressFocusNode = FocusNode();
+    passwordTextController = TextEditingController();
+    passwordFocusNode = FocusNode();
+  }
 
   void dispose() {
     emailAddressTextController.dispose();
@@ -25,6 +33,8 @@ class LoginModel {
   }
 
   Future<bool> loginUser() async {
+    await _clearOldToken(); // Wyczyść stare tokeny przed logowaniem
+
     final email = emailAddressTextController.text.trim();
     final password = passwordTextController.text.trim();
 
@@ -45,13 +55,45 @@ class LoginModel {
         }),
       );
 
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response body: ${response.body}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
         debugPrint("Login successful: $responseData");
 
-        // Tutaj odczytaj pole "role" i "access_token" zwrócone przez backend
         accessToken = responseData["access_token"];
         role = responseData["role"];
+        bool isProfileComplete = responseData["isProfileComplete"] ?? false;
+
+        // Dekodowanie JWT, aby wyodrębnić rentalCompanyIds
+        if (accessToken != null) {
+          try {
+            final parts = accessToken!.split('.');
+            if (parts.length == 3) {
+              final payload = parts[1];
+              final normalized = base64.normalize(payload);
+              final payloadMap =
+                  json.decode(utf8.decode(base64.decode(normalized)));
+
+              if (payloadMap is Map && payloadMap["rentalCompanyIds"] != null) {
+                rentalCompanyIds =
+                    List<String>.from(payloadMap["rentalCompanyIds"]);
+              }
+            } else {
+              debugPrint("Invalid JWT token structure.");
+            }
+          } catch (e) {
+            debugPrint("Error decoding JWT: $e");
+          }
+        }
+
+        debugPrint("Access Token: $accessToken, Role: $role");
+        debugPrint("RentalCompanyIds: $rentalCompanyIds");
+
+        // Zapisz dane użytkownika w SharedPreferences
+        await _saveUserData(
+            accessToken, role, rentalCompanyIds, isProfileComplete);
 
         return true;
       } else {
@@ -62,5 +104,60 @@ class LoginModel {
       debugPrint("Error during login: $e");
       return false;
     }
+  }
+
+
+  Future<void> _clearOldToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Czyszczenie wszystkich zapisanych danych
+  }
+
+Future<void> _saveUserData(String? token, String? userRole,
+      List<String>? rentalCompanyIds, bool isProfileComplete) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (token != null) {
+      await prefs.setString('access_token', token);
+    }
+
+    if (userRole != null) {
+      await prefs.setString('role', userRole);
+    }
+
+    if (isProfileComplete != null) {
+      await prefs.setBool('isProfileComplete', isProfileComplete);
+    }
+
+    if (userRole == "employee" &&
+        rentalCompanyIds != null &&
+        rentalCompanyIds.isNotEmpty) {
+      await prefs.setString('rentalCompanyIds', jsonEncode(rentalCompanyIds));
+    }
+  }
+
+
+
+  Future<String?> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token');
+  }
+
+  Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_role');
+  }
+
+  Future<List<String>?> getRentalCompanyIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rentalCompanyIdsJson = prefs.getString('rentalCompanyIds');
+    if (rentalCompanyIdsJson != null) {
+      return List<String>.from(json.decode(rentalCompanyIdsJson));
+    }
+    return null;
+  }
+
+  Future<bool?> getProfileCompletionStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isProfileComplete');
   }
 }

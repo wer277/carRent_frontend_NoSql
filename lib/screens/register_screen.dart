@@ -51,8 +51,8 @@ class _RegisterWidgetState extends State<RegisterWidget>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Theme.of(context).primaryColor,
-                tertiaryColor,
+                gradient1Color,
+                gradient2Color,
               ],
               stops: const [0, 1],
               begin: const AlignmentDirectional(0.87, -1),

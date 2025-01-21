@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+const Color gradient1Color = Color(0xFF1BCEF1); // Primary 
+const Color gradient2Color = Color(0xFF1E2841); // Primary 
 // Kolory z Flutter Flow
-const Color primaryColor = Color(0xFF7EA629); // Primary
+const Color primaryColor = Color(0xFF1D95C6); // Primary
 const Color secondaryColor = Color(0xFFF5F5DC); // Secondary
-const Color tertiaryColor = Color(0xFF00FF00); // Tertiary
-const Color alternateColor = Color(0xFF618C03); // Alternate
+const Color tertiaryColor = Color(0xFF1E2841); // Tertiary
+const Color alternateColor = Color(0xFF1BCEF1); // Alternate
 const Color primaryTextColor = Color(0xFF000000); // Primary text
 const Color secondaryTextColor = Color(0xFF757575); // Secondary text
 const Color primaryBackgroundColor = Color(0xFFFFFFFF); // Primary Background
