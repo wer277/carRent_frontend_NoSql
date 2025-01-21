@@ -64,6 +64,7 @@ class LoginModel {
 
         accessToken = responseData["access_token"];
         role = responseData["role"];
+        bool isProfileComplete = responseData["isProfileComplete"] ?? false;
 
         // Dekodowanie JWT, aby wyodrębnić rentalCompanyIds
         if (accessToken != null) {
@@ -90,8 +91,9 @@ class LoginModel {
         debugPrint("Access Token: $accessToken, Role: $role");
         debugPrint("RentalCompanyIds: $rentalCompanyIds");
 
-        // Zapisz token, rolę i rentalCompanyIds (tylko dla employee) w SharedPreferences
-        await _saveUserData(accessToken, role, rentalCompanyIds);
+        // Zapisz dane użytkownika w SharedPreferences
+        await _saveUserData(
+            accessToken, role, rentalCompanyIds, isProfileComplete);
 
         return true;
       } else {
@@ -104,32 +106,36 @@ class LoginModel {
     }
   }
 
+
   Future<void> _clearOldToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Czyszczenie wszystkich zapisanych danych
   }
 
-  Future<void> _saveUserData(
-      String? token, String? userRole, List<String>? rentalCompanyIds) async {
+Future<void> _saveUserData(String? token, String? userRole,
+      List<String>? rentalCompanyIds, bool isProfileComplete) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (token != null) {
-      debugPrint("Saving token: $token");
       await prefs.setString('access_token', token);
     }
 
     if (userRole != null) {
-      debugPrint("Saving role: $userRole");
-      await prefs.setString('user_role', userRole);
+      await prefs.setString('role', userRole);
+    }
+
+    if (isProfileComplete != null) {
+      await prefs.setBool('isProfileComplete', isProfileComplete);
     }
 
     if (userRole == "employee" &&
         rentalCompanyIds != null &&
         rentalCompanyIds.isNotEmpty) {
-      debugPrint("Saving rentalCompanyIds: $rentalCompanyIds");
       await prefs.setString('rentalCompanyIds', jsonEncode(rentalCompanyIds));
     }
   }
+
+
 
   Future<String?> getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -148,5 +154,10 @@ class LoginModel {
       return List<String>.from(json.decode(rentalCompanyIdsJson));
     }
     return null;
+  }
+
+  Future<bool?> getProfileCompletionStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isProfileComplete');
   }
 }

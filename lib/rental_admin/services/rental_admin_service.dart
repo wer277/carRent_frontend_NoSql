@@ -15,11 +15,11 @@ class RentalService {
 
   Future<void> _handleUnauthorized() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Usuń token i inne dane użytkownika
+    await prefs.clear(); 
     throw Exception('Unauthorized access. Please log in again.');
   }
 
-  /// Pobiera dane zalogowanego rental_admin
+
   Future<RentalAdmin> getCurrentAdmin() async {
     final token = await _getToken();
     if (token == null) {

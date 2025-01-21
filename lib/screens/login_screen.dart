@@ -7,7 +7,7 @@ import 'package:carrent_frontend/colors.dart';
 import "package:carrent_frontend/platform_admin/screens/navigation_menu_platform_admin.dart";
 
 class LoginWidget extends StatefulWidget {
-  final String Function(String?) getHomeRoute;
+  final String Function(String?, bool?) getHomeRoute;
 
   const LoginWidget({super.key, required this.getHomeRoute});
 
@@ -283,6 +283,9 @@ class _LoginWidgetState extends State<LoginWidget>
                                     final String? userRole = _model.role;
                                     final List<String>? rentalCompanyIds =
                                         await _model.getRentalCompanyIds();
+                                    final bool? isProfileComplete = await _model
+                                            .getProfileCompletionStatus() ??
+                                        true;
 
                                     if (userRole == 'employee' &&
                                         (rentalCompanyIds == null ||
@@ -297,23 +300,8 @@ class _LoginWidgetState extends State<LoginWidget>
                                     }
 
                                     final String homeRoute =
-                                        widget.getHomeRoute(userRole);
-                                    print('Home route: $homeRoute');
-                                    print('User role: $userRole');
-                                    print(
-                                        'RentalCompanyIds: $rentalCompanyIds');
-
-                                    // Resetowanie indeksu nawigacji
-                                    if (!Get.isRegistered<
-                                        NavigationControllerPlatformAdmin>()) {
-                                      Get.put(
-                                          NavigationControllerPlatformAdmin());
-                                    }
-                                    final navigationController = Get.find<
-                                        NavigationControllerPlatformAdmin>();
-                                    navigationController.selectedIndex.value =
-                                        0;
-
+                                        widget.getHomeRoute(
+                                            userRole, isProfileComplete);
                                     Navigator.pushReplacementNamed(
                                         context, homeRoute);
                                   } else {
