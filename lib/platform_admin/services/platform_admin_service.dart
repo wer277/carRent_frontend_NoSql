@@ -39,11 +39,11 @@ class RentalAdminService {
       List<dynamic> data = json.decode(response.body);
       return data.map((json) => RentalAdmin.fromJson(json)).toList();
     } else if (response.statusCode == 401) {
-      await _handleUnauthorized(); // Obsługa błędu 401
-      throw Exception('Unauthorized request.'); // Dodano `throw` dla błędu 401
+      await _handleUnauthorized(); 
+      throw Exception('Unauthorized request.'); 
     } else {
       throw Exception(
-          'Failed to fetch rental admins: ${response.body}'); // Dodano `throw` dla innych błędów
+          'Failed to fetch rental admins: ${response.body}');
     }
   }
 
@@ -62,7 +62,7 @@ class RentalAdminService {
     );
 
     if (response.statusCode == 401) {
-      await _handleUnauthorized(); // Obsługa błędu 401
+      await _handleUnauthorized(); 
     } else if (response.statusCode != 200) {
       throw Exception('Failed to delete rental admin: ${response.body}');
     }
@@ -84,7 +84,7 @@ class RentalAdminService {
     );
 
     if (response.statusCode == 401) {
-      await _handleUnauthorized(); // Obsługa błędu 401
+      await _handleUnauthorized(); 
     } else if (response.statusCode != 200) {
       throw Exception('Failed to update rental admin: ${response.body}');
     }
@@ -93,15 +93,11 @@ class RentalAdminService {
 Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Usuń wszystkie dane
     await prefs.clear();
 
-    // Przekierowanie na ekran logowania
     Navigator.pushNamedAndRemoveUntil(context, 'Login', (route) => false);
   }
 
-  // rental_admin_service.dart
-  // W rental_admin_service.dart dodaj metodę:
   Future<void> createRentalAdmin(Map<String, dynamic> data) async {
     final token = await _getToken();
     if (token == null) {
@@ -133,7 +129,7 @@ Future<void> logout(BuildContext context) async {
       throw Exception('No access token found');
     }
 
-    print('Sending token: $token'); // Debugowanie tokena
+    print('Sending token: $token');
 
     final response = await http.get(
       Uri.parse('$baseUrl/platform_admins/current'),

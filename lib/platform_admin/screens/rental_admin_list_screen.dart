@@ -51,12 +51,12 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
         .push(
           MaterialPageRoute(
             builder: (context) => EditRentalAdminScreen(
-              admin: admin, // Przekazujemy cały obiekt admina
+              admin: admin,
               service: widget.service,
             ),
           ),
         )
-        .then((_) => _loadRentalAdmins()); // Reload list after editing
+        .then((_) => _loadRentalAdmins()); 
   }
 
   @override
@@ -104,7 +104,7 @@ class _RentalAdminListScreenState extends State<RentalAdminListScreen> {
                       rentalAdmin: admin,
                       onDelete: () => _deleteRentalAdmin(admin.id),
                       onEdit: () =>
-                          _navigateToEditScreen(admin), // Przekaż cały obiekt
+                          _navigateToEditScreen(admin), 
                     );
                   },
                 );

@@ -44,7 +44,6 @@ class RentalService {
     throw Exception('Failed to fetch rental admin data: ${response.body}');
   }
 
-  /// Aktualizuje dane zalogowanego rental_admin
   Future<void> updateCurrentAdmin(Map<String, dynamic> updateData) async {
     final token = await _getToken();
     if (token == null) {

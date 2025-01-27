@@ -1,5 +1,3 @@
-// create_rental_admin_screen.dart
-
 import 'package:flutter/material.dart';
 import '../services/platform_admin_service.dart';
 
@@ -98,7 +96,6 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
       ),
       body: Stack(
         children: [
-          // Background image
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -110,7 +107,6 @@ class _CreateRentalAdminScreenState extends State<CreateRentalAdminScreen> {
               ),
             ),
           ),
-          // Form content
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(

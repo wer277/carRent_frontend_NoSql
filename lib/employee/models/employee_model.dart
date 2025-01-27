@@ -1,10 +1,10 @@
+// employee_model.dart
 class Employee {
   final String id;
   final String name;
   final String surname;
   final String email;
-  final String?
-      rentalCompanyId; // Opcjonalne pole, jeśli nie zawsze jest zwracane
+  final String? rentalCompanyId;
 
   Employee({
     required this.id,
@@ -14,7 +14,7 @@ class Employee {
     this.rentalCompanyId,
   });
 
-factory Employee.fromJson(Map<String, dynamic> json) {
+  factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
       id: json['_id'] ?? '',
       name: json['name'] ?? json['firstName'] ?? 'No name provided',
@@ -27,15 +27,12 @@ factory Employee.fromJson(Map<String, dynamic> json) {
     );
   }
 
-
-
-
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'surname': surname,
       'email': email,
-      'rentalCompanyId': rentalCompanyId,
+      'rentalCompanyIds': rentalCompanyId != null ? [rentalCompanyId] : [],
     };
   }
 }

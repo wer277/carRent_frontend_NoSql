@@ -237,7 +237,6 @@ class _LoginWidgetState extends State<LoginWidget>
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  //Dodać logikę przejścia do ekranu forget password
                                 },
                                 child: RichText(
                                   text: TextSpan(

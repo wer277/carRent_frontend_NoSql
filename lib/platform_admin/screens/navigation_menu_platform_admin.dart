@@ -71,10 +71,10 @@ class NavigationControllerPlatformAdmin extends GetxController {
 
   Widget getScreen(RentalAdminService service) {
     final screens = [
-      RentalAdminListScreen(service: service), // index 0
-      CreateRentalAdminScreen(service: service), // index 1
+      RentalAdminListScreen(service: service),
+      CreateRentalAdminScreen(service: service),
       PromotionsScreen(), // index 2
-      PlatformAdminProfile(service: service,), // index 3
+      PlatformAdminProfile(service: service,),
     ];
 
     return screens[selectedIndex.value];

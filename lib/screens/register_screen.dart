@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:google_fonts/google_fonts.dart';
-//import 'package:provider/provider.dart';
-
 import '../models/register_model.dart';
 import '../colors.dart';
 
@@ -337,7 +334,7 @@ class _RegisterWidgetState extends State<RegisterWidget>
                                             .bodyLarge
                                             ?.copyWith(
                                               color:
-                                                  primaryTextColor, // Kolor tekstu na primaryTextColor
+                                                  primaryTextColor, 
                                             ),
                                       ),
                                       TextSpan(

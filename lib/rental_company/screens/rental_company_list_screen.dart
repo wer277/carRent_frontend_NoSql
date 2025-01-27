@@ -1,4 +1,3 @@
-// rental_company_list_screen.dart
 import 'package:flutter/material.dart';
 import '../services/rental_company_service.dart';
 import '../models/rental_company_model.dart';
@@ -6,7 +5,7 @@ import '../widgets/rental_company_item.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
 import 'edit_rental_company_screen.dart';
-import '../../employee/screens/employee_list_screen.dart'; // Import EmployeeListScreen
+import '../../employee/screens/employee_list_screen.dart';
 
 class RentalCompanyListScreen extends StatefulWidget {
   final RentalCompanyService service;
@@ -58,7 +57,7 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
             ),
           ),
         )
-        .then((_) => _loadRentalCompanies()); // Reload list after editing
+        .then((_) => _loadRentalCompanies()); 
   }
 
   void _navigateToEmployeeList(String rentalCompanyId) {
@@ -86,7 +85,6 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
       ),
       body: Stack(
         children: [
-          // Tło z grafiką
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -98,7 +96,6 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
               ),
             ),
           ),
-          // Zawartość ekranu
           FutureBuilder<List<RentalCompany>>(
             future: _rentalCompanies,
             builder: (context, snapshot) {
@@ -120,7 +117,6 @@ class _RentalCompanyListScreenState extends State<RentalCompanyListScreen> {
                       rentalCompany: company,
                       onDelete: () => _deleteRentalCompany(company.id),
                       onEdit: () => _navigateToEditScreen(company),
-                      // Modify onTap to navigate to employee list
                       onTap: () => _navigateToEmployeeList(company.id),
                     );
                   },

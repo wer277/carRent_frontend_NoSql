@@ -80,8 +80,6 @@ Future<void> createVehicle(Map<String, dynamic> data) async {
   }
 
 
-
-
   // Aktualizacja danych pojazdu
 Future<void> updateVehicle(String id, Map<String, dynamic> data) async {
     final token = await _getToken();

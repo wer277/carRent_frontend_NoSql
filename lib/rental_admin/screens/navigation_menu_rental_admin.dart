@@ -53,8 +53,6 @@ class NavigationMenuRentalCompany extends StatelessWidget {
                       icon: Icon(Iconsax.buildings), label: 'Add'),
                   NavigationDestination(
                       icon: Icon(Iconsax.add), label: 'Profile'),
-                  //NavigationDestination(
-                   //   icon: Icon(Iconsax.user), label: 'Profil'),
                 ],
               ),
             ),
@@ -86,13 +84,10 @@ class NavigationControllerRentalCompany extends GetxController {
       RentalService rentalAdminService) {
     final screens = [
       RentalCompanyListScreen(
-          service: rentalCompanyService), // index 0: Placeholder for Home
-      // index 1: Lista wypożyczalni
+          service: rentalCompanyService), 
       CreateRentalCompanyScreen(
-          service: rentalCompanyService), // index 2: Tworzenie wypożyczalni
+          service: rentalCompanyService), 
       RentalAdminProfile(service: rentalAdminService),
-      //RentalAdminProfile(
-       //   service: rentalAdminService), // index 3: Profil rental_admin
     ];
 
     return screens[selectedIndex.value];

@@ -4,14 +4,14 @@ import '../models/employee_model.dart';
 class EmployeeItem extends StatelessWidget {
   final Employee employee;
   final VoidCallback onDelete;
-  final VoidCallback onEdit; // Dodaj callback dla edycji
+  final VoidCallback onEdit; 
   final VoidCallback? onTap;
 
   const EmployeeItem({
     Key? key,
     required this.employee,
     required this.onDelete,
-    required this.onEdit, // Dodaj do konstruktora
+    required this.onEdit, 
     this.onTap,
   }) : super(key: key);
 

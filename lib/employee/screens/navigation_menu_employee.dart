@@ -100,12 +100,12 @@ class NavigationControllerEmployee extends GetxController {
   Widget getScreen(VehicleService vehicleService,
       RentalCompanyService rentalCompanyService, String rentalCompanyId) {
     final screens = [
-      VehicleListScreen(service: vehicleService), // index 0: Lista pojazdów
+      VehicleListScreen(service: vehicleService), 
       CreateVehicleScreen(
           service: vehicleService,
-          rentalCompanyId: rentalCompanyId), // index 1: Dodawanie pojazdu
+          rentalCompanyId: rentalCompanyId), 
       EmployeeProfileScreen(
-          service: rentalCompanyService), // index 2: Profil pracownika
+          service: rentalCompanyService), 
     ];
 
     return screens[selectedIndex.value];

@@ -14,7 +14,6 @@ class ReservationView {
   });
 
   factory ReservationView.fromJson(Map<String, dynamic> json) {
-    // Obsługa pola 'vehicleId' zamiast 'vehicle'
     Vehicle vehicle;
     if (json['vehicleId'] is Map<String, dynamic>) {
       vehicle = Vehicle.fromJson(json['vehicleId']);

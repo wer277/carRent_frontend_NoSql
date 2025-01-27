@@ -13,7 +13,7 @@ class RentalAdmin {
 
   factory RentalAdmin.fromJson(Map<String, dynamic> json) {
     return RentalAdmin(
-      id: json['_id'], // Jeśli backend używa MongoDB, ID może być `_id`
+      id: json['_id'], 
       name: json['name'],
       surname: json['surname'],
       email: json['email'],

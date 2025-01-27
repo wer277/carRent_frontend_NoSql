@@ -1,12 +1,11 @@
-// screens/employee_list_screen.dart
 import 'package:flutter/material.dart';
 import '../../rental_company/services/rental_company_service.dart';
 import '../models/employee_model.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
 import 'create_employee_screen.dart';
-import 'edit_employee_screen.dart'; // Importuj ekran edycji
-import '../widgets/employee_item.dart'; // Import EmployeeItem
+import 'edit_employee_screen.dart'; 
+import '../widgets/employee_item.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   final RentalCompanyService service;

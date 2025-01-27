@@ -11,7 +11,6 @@ class _PromotionsScreenState extends State<PromotionsScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicjalizacja danych promocji, gdy będą dostępne
   }
 
   @override

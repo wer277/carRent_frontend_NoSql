@@ -72,7 +72,7 @@ class ClientVehicleService {
         'vehicleId': vehicleId,
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
-        'rentalPrice': 100.0, // Przykładowa cena; dostosuj według potrzeb
+        'rentalPrice': 100.0, 
       }),
     );
 

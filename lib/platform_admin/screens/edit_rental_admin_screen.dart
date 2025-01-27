@@ -27,7 +27,6 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
   @override
   void initState() {
     super.initState();
-    // Inicjalizacja kontrolerów z danymi przekazanego administratora
     _nameController = TextEditingController(text: widget.admin.name);
     _surnameController = TextEditingController(text: widget.admin.surname);
     _emailController = TextEditingController(text: widget.admin.email);
@@ -38,21 +37,19 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
       setState(() => _isLoading = true);
       _formKey.currentState?.save();
 
-      // Przygotowanie danych do aktualizacji
       Map<String, dynamic> updateData = {
         'name': _nameController.text,
         'surname': _surnameController.text,
         'email': _emailController.text,
       };
 
-      // Dodaj hasło do danych, jeśli zostało wprowadzone
       if (_password != null && _password!.isNotEmpty) {
         updateData['password'] = _password;
       }
 
       try {
         await widget.service.updateRentalAdmin(
-          widget.admin.id, // Używamy id z obiektu admin
+          widget.admin.id, 
           updateData,
         );
 
@@ -238,7 +235,6 @@ class _EditRentalAdminScreenState extends State<EditRentalAdminScreen> {
                                 obscureText: true,
                                 onSaved: (value) => _password = value,
                                 validator: (value) {
-                                  // Hasło jest opcjonalne
                                   return null;
                                 },
                               ),

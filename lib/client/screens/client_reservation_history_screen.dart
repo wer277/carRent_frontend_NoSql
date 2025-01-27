@@ -3,7 +3,7 @@ import '../services/client_vehicle_service.dart';
 import '../../shared/widgets/loading_indicator.dart';
 import '../../shared/widgets/error_message.dart';
 import '../widgets/client_reservation_item.dart';
-import '../models/reservation.model.dart'; // Import modelu ReservationView
+import '../models/reservation.model.dart';
 
 class ClientReservationHistoryScreen extends StatefulWidget {
   final ClientVehicleService service;
@@ -30,7 +30,6 @@ class _ClientReservationHistoryScreenState
     setState(() {
       _reservations =
           widget.service.getReservedVehicles().then((reservationsJson) {
-        // Zakładamy, że getReservedVehicles() zwraca listę map JSON
         return reservationsJson
             .map<ReservationView>((json) => ReservationView.fromJson(json))
             .toList();
@@ -51,12 +50,11 @@ class _ClientReservationHistoryScreenState
       ),
       body: Stack(
         children: [
-          // Warstwa tła z obrazkiem
           Center(
             child: Opacity(
               opacity: 0.3,
               child: Image.asset(
-                'assets/images/tloListView.png', // ścieżka do obrazka w tle
+                'assets/images/tloListView.png',
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,

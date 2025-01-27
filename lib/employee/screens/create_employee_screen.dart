@@ -44,7 +44,7 @@ class _CreateEmployeeScreenState extends State<CreateEmployeeScreen> {
           'password': _passwordController.text,
           'name': _nameController.text.trim(),
           'surname': _surnameController.text.trim(),
-          'rentalCompanyId': widget.rentalCompanyId,
+          'rentalCompanyIds': [widget.rentalCompanyId],
         });
 
         if (mounted) {

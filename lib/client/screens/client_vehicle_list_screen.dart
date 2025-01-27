@@ -82,7 +82,6 @@ class _ClientVehicleListScreenState extends State<ClientVehicleListScreen> {
                     return ClientVehicleItem(
                       vehicle: vehicle,
                       onReserve: () async {
-                        // Wybór daty rozpoczęcia
                         final startDate = await showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
@@ -100,7 +99,6 @@ class _ClientVehicleListScreenState extends State<ClientVehicleListScreen> {
                           return;
                         }
 
-                        // Wybór daty zakończenia
                         final endDate = await showDatePicker(
                           context: context,
                           initialDate: startDate.add(const Duration(days: 1)),

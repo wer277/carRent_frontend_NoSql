@@ -31,7 +31,6 @@ class _EditRentalCompanyScreenState extends State<EditRentalCompanyScreen> {
       setState(() => _isLoading = true);
       _formKey.currentState?.save();
 
-      // Przygotowanie danych do aktualizacji
       Map<String, dynamic> updateData = {
         'name': _name,
         'contactEmail': _email,
@@ -88,7 +87,6 @@ class _EditRentalCompanyScreenState extends State<EditRentalCompanyScreen> {
       ),
       body: Stack(
         children: [
-          // Tło z grafiką i przezroczystością
           Center(
             child: Opacity(
               opacity: 0.3,
@@ -100,7 +98,6 @@ class _EditRentalCompanyScreenState extends State<EditRentalCompanyScreen> {
               ),
             ),
           ),
-          // Zawartość formularza
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(

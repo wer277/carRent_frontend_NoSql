@@ -1,4 +1,3 @@
-// widgets/rental_company_item.dart
 import 'package:flutter/material.dart';
 import '../models/rental_company_model.dart';
 
